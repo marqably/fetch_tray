@@ -1,0 +1,27 @@
+name: fetch_tray
+description: A set of flutter_hooks to make fetching and working with data from apis easier.
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: ">=2.17.3 <3.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_hooks: 0.18.5  
+  http: ^0.13.4
+  mockito: ^5.2.0
+  build_runner:
+
+dev_dependencies:
+  test:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 2.0.1
+  hooks_riverpod: ^1.0.4
+
+flutter:
