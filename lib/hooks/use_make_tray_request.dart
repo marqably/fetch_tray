@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:fetch_tray/contracts/tray_environment.dart';
 import 'package:fetch_tray/contracts/tray_request.dart';
 import 'package:fetch_tray/utils/make_tray_request.dart';
 import 'package:fetch_tray/utils/make_tray_testing_request.dart';
@@ -44,6 +45,7 @@ TrayRequestHookResponse<RequestType, ResultType>
   http.Client? client,
   TrayRequestMock? mock,
   bool lazyRun = false,
+  FetchTrayDebugLevel? requestDebugLevel,
 }) {
   final fetchResult =
       useState<TrayRequestHookResponse<RequestType, ResultType>>(
@@ -86,7 +88,8 @@ TrayRequestHookResponse<RequestType, ResultType>
     // if we are in mocking mode -> take `makeTrayTestingRequest` otherwise use `makeTrayRequest`
     final makeTrayRequestMethod = (mock != null)
         ? makeTrayTestingRequest(theRequest, mock)
-        : makeTrayRequest(theRequest, client: client);
+        : makeTrayRequest(theRequest,
+            client: client, requestDebugLevel: requestDebugLevel);
 
     return makeTrayRequestMethod.then((response) {
       fetchResult.value = TrayRequestHookResponse<RequestType, ResultType>(

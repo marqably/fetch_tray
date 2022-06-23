@@ -9,6 +9,12 @@ enum FetchTrayDebugLevel {
   everything,
 }
 
+enum FetchTrayLogLevel {
+  info,
+  warning,
+  error,
+}
+
 /// The client providing default data to every request being made with it
 ///
 /// If [debugLevel] defines how much should be logged for development support purposes
@@ -16,13 +22,13 @@ class TrayEnvironment {
   final String baseUrl;
   final Map<String, String>? headers;
   final Map<String, String>? params;
-  final FetchTrayDebugLevel? debugLevel;
+  final FetchTrayDebugLevel debugLevel;
 
   TrayEnvironment({
     this.baseUrl = '',
     this.headers,
     this.params,
-    this.debugLevel,
+    this.debugLevel = FetchTrayDebugLevel.errorsAndWarnings,
   });
 
   /// merges custom request headers into the the headers here and
@@ -84,53 +90,56 @@ class TrayEnvironment {
     );
   }
 
-  /// lets us easily find out whether to show a specific log message or not
-  /// it will not only match the exact log level, gut also the ones below
-  /// for example, if I choose errorsAndWarning (this would also inlcude the levels above like errors or everything)
-  /// TODO: write a test for this
-  bool isDebugLevel(FetchTrayDebugLevel debugLevelToTest,
-      [FetchTrayDebugLevel? localDebugLevel]) {
-    print('THIS IS THE DEBUG LEVEL: $debugLevel');
-
+  /// lets us easily find out whether to show a specific [logType] message or not
+  ///
+  /// If a [localDebugLevel] is provided, our logType will be compared against that
+  /// If no [localDebugLevel] is provided, we will use the global one defined by TrayEnvironment initialization.
+  bool showDebugInfo({
+    FetchTrayLogLevel logType = FetchTrayLogLevel.info,
+    FetchTrayDebugLevel? localDebugLevel,
+  }) {
     // if we got a local debug level -> check that
     if (localDebugLevel != null) {
-      return compareDebugLevels(localDebugLevel, debugLevelToTest);
+      return matchesDebugLevels(
+        logType: logType,
+        requestDebugLevel: localDebugLevel,
+      );
     }
 
     // otherwise check the global debug level
-    return compareDebugLevels(debugLevel!, debugLevelToTest);
+    return matchesDebugLevels(
+      logType: logType,
+      requestDebugLevel: debugLevel,
+    );
   }
 
-  /// Compares the [currentDebugLevel] to the [comparisonDebugLevel] (the level we are checking for).
+  /// Compares the [logType] to the [requestDebugLevel] to find out whether a debug Info should be shown for this combination or not.
   ///
-  /// It will not only match the exact log level, gut also the ones below
-  /// for example, if I choose errorsAndWarning (this would also inlcude the levels above like errors or everything)
-  bool compareDebugLevels(FetchTrayDebugLevel currentDebugLevel,
-      FetchTrayDebugLevel comparisonDebugLevel) {
+  /// The result will be a boolean telling us whether we should log something.
+  bool matchesDebugLevels({
+    FetchTrayLogLevel logType = FetchTrayLogLevel.info,
+    FetchTrayDebugLevel requestDebugLevel = FetchTrayDebugLevel.everything,
+  }) {
     // log level none
-    if (comparisonDebugLevel == FetchTrayDebugLevel.none) {
+    if (requestDebugLevel == FetchTrayDebugLevel.none) {
       return false;
     }
+
     // log level errors
-    if (comparisonDebugLevel == FetchTrayDebugLevel.onlyErrors &&
-        (currentDebugLevel == FetchTrayDebugLevel.onlyErrors ||
-            currentDebugLevel == FetchTrayDebugLevel.errorsAndWarnings ||
-            currentDebugLevel == FetchTrayDebugLevel.everything)) {
+    if (requestDebugLevel == FetchTrayDebugLevel.onlyErrors &&
+        logType == FetchTrayLogLevel.error) {
       return true;
     }
+
     // log level errors and warnings
-    if (comparisonDebugLevel == FetchTrayDebugLevel.errorsAndWarnings &&
-        (currentDebugLevel == FetchTrayDebugLevel.errorsAndWarnings ||
-            currentDebugLevel == FetchTrayDebugLevel.everything)) {
+    if (requestDebugLevel == FetchTrayDebugLevel.errorsAndWarnings &&
+        (logType == FetchTrayLogLevel.warning ||
+            logType == FetchTrayLogLevel.error)) {
       return true;
     }
+
     // log level everything
-    if (comparisonDebugLevel == FetchTrayDebugLevel.everything
-            // TODO: check this out. This should actually not be needed, because everything is EVERYTHIng.
-            &&
-            currentDebugLevel == FetchTrayDebugLevel.everything
-        // TODO: fix this
-        ) {
+    if (requestDebugLevel == FetchTrayDebugLevel.everything) {
       return true;
     }
 

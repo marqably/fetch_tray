@@ -1,12 +1,11 @@
 import 'dart:developer';
 
-import 'package:fetch_tray/contracts/tray_request.dart';
-import 'package:fetch_tray/utils/make_tray_request.dart';
-import 'package:fetch_tray/utils/make_tray_testing_request.dart';
+import '../contracts/tray_environment.dart';
+import '../contracts/tray_request.dart';
+import '../utils/make_tray_request.dart';
+import '../utils/make_tray_testing_request.dart';
 import 'package:flutter/widgets.dart';
-// import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http/http.dart' as http;
-// import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import './use_make_tray_request.mocks.dart';
@@ -15,7 +14,7 @@ import './use_make_tray_request.mocks.dart';
 class LazyTrayRequestHookResponse {
   final Future<TrayRequestResponse<ResultType>> Function<ResultType>(
     TrayRequest request, {
-    bool enableDebug,
+    FetchTrayDebugLevel? requestDebugLevel,
   }) makeRequest;
 
   LazyTrayRequestHookResponse({
@@ -29,6 +28,7 @@ class LazyTrayRequestHookResponse {
 LazyTrayRequestHookResponse useMakeLazyTrayRequest({
   http.Client? client,
   TrayRequestMock? mock,
+  FetchTrayDebugLevel? requestDebugLevel,
 }) {
   // final fetchResult = useState<LazyTrayRequestHookResponse<ResultType>?>(
   //   LazyTrayRequestHookResponse<ResultType>(),
@@ -39,7 +39,7 @@ LazyTrayRequestHookResponse useMakeLazyTrayRequest({
 
   return LazyTrayRequestHookResponse(makeRequest: <ResultType>(
     TrayRequest request, {
-    bool enableDebug = false,
+    FetchTrayDebugLevel? requestDebugLevel,
   }) async {
     // get the correct request method
     final methodCall = getEnvironmentMethod(mockClient, request.method);
@@ -59,14 +59,15 @@ LazyTrayRequestHookResponse useMakeLazyTrayRequest({
     // if we are in mocking mode -> take `makeTrayTestingRequest` otherwise use `makeTrayRequest`
     final makeTrayRequestMethod = (mock != null)
         ? makeTrayTestingRequest<ResultType>(request, mock)
-        : makeTrayRequest<ResultType>(request, client: client);
+        : makeTrayRequest<ResultType>(request,
+            client: client, requestDebugLevel: requestDebugLevel);
 
     try {
       final response =
           await makeTrayRequestMethod.catchError((error, stacktrace) {
         // log error
         log(
-          'An error happened with url: ${request.getUrlWithParams()}: $error',
+          'SHOULD NOT SHOW: An error happened with url: ${request.getUrlWithParams()}: $error',
           error: error,
           stackTrace: stacktrace,
         );
@@ -83,10 +84,9 @@ LazyTrayRequestHookResponse useMakeLazyTrayRequest({
       });
 
       // log error
-      if (enableDebug) {
-        log('${request.method} REQUEST: ${request.getUrlWithParams()}: ');
-        inspect(request);
-      }
+      // if (debugLevel == FetchTrayDebugLevel.) {
+      //   log('${request.method} REQUEST: ${request.getUrlWithParams()}: ');
+      // }
 
       return response;
     } catch (err, stacktrace) {

@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:fetch_tray/contracts/tray_request.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 
 import '../contracts/tray_environment.dart';
 
@@ -104,7 +104,7 @@ class TrayRequestMock {
 Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
   TrayRequest request, {
   http.Client? client,
-  FetchTrayDebugLevel requestDebugLevel = FetchTrayDebugLevel.onlyErrors,
+  FetchTrayDebugLevel? requestDebugLevel,
 }) async {
   // define the client
   final theClient = client ?? http.Client();
@@ -120,7 +120,7 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
     logRequest(
       message:
           '---------------------------------- \nStarting FetchTray Request (${request.getUrlWithParams()})',
-      debugLevel: FetchTrayDebugLevel.everything,
+      logType: FetchTrayLogLevel.info,
       requestDebugLevel: requestDebugLevel,
       request: request,
       response: response,
@@ -136,7 +136,7 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
     // if in debug mode (at least FetchTrayDebugLevel.everything) -> log
     logRequest(
       message: 'FetchTray Response (${request.getUrlWithParams()})',
-      debugLevel: FetchTrayDebugLevel.everything,
+      logType: FetchTrayLogLevel.info,
       requestDebugLevel: requestDebugLevel,
       request: request,
       response: response,
@@ -162,6 +162,16 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
     // try to parse the json anyway, so we can get a good error message
     final bodyJson = jsonDecode(response.body);
 
+    // log error
+    logRequest(
+      message:
+          'FETCH TRAY EXCEPTION: Api returned the status error code ${response.statusCode}',
+      logType: FetchTrayLogLevel.error,
+      requestDebugLevel: requestDebugLevel,
+      request: request,
+      response: response,
+    );
+
     // If the server did not return a 200 OK response,
     // then throw an exception.
     return TrayRequestResponse(
@@ -174,15 +184,16 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
   }
   // If we got an error related to formatting -> we probably got a wrong response from server
   // either no json response, or the json doesn't match our model
-  on FormatException catch (err) {
+  on FormatException catch (err, stackTrace) {
     // if in debug mode (at least FetchTrayDebugLevel.onlyErrors) -> allow logging
     logRequest(
       message:
           'FETCH TRAY FORMAT EXCEPTION: result could not be converted! Please check whether the result was really a json entity representing the model. (${err.toString()})',
-      debugLevel: FetchTrayDebugLevel.onlyErrors,
+      logType: FetchTrayLogLevel.error,
       requestDebugLevel: requestDebugLevel,
       request: request,
       response: response,
+      stackTrace: stackTrace,
     );
 
     // return tray response with error
@@ -200,8 +211,18 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
         },
       ),
     );
-  } on Exception {
-    // If the server did not return a 200 OK response,
+  } on Exception catch (err, stackTrace) {
+    // log an error to console
+    logRequest(
+      message: 'FETCH TRAY EXCEPTION: ${err.toString()}',
+      logType: FetchTrayLogLevel.error,
+      requestDebugLevel: requestDebugLevel,
+      request: request,
+      response: response,
+      stackTrace: stackTrace,
+    );
+
+    // If there was another exception
     // then throw an exception.
     return TrayRequestResponse(
       error: request.getEnvironment().parseErrorDetails(
@@ -219,26 +240,45 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
 /// provides a shortcut to logging out requests
 void logRequest({
   required TrayRequest request,
-  required FetchTrayDebugLevel debugLevel,
-  required FetchTrayDebugLevel requestDebugLevel,
+  required FetchTrayLogLevel logType,
   required http.Response response,
+  FetchTrayDebugLevel? requestDebugLevel,
   String? message,
+  StackTrace? stackTrace,
 }) {
-  final shouldBeShown =
-      (request.getEnvironment().isDebugLevel(debugLevel, requestDebugLevel));
+  final shouldBeShown = (request
+      .getEnvironment()
+      .showDebugInfo(logType: logType, localDebugLevel: requestDebugLevel));
 
   // if should not be shown -> do nothing
   if (shouldBeShown == false) {
     return;
   }
 
-  // if in debug mode -> allow logging
-  log(message ?? '*************************** \nLogging request ${request.url}',
-      name: 'fetchtray.request',
-      error: jsonEncode({
-        'request': Uri.parse(request.getUrlWithParams()).toString(),
-        'headers': request.getHeaders(),
-        'body': request.getBody(),
-        'resultBody': response.body,
-      }));
+  var logger = Logger();
+
+  // define request details:
+  var encoder = const JsonEncoder.withIndent("     ");
+  final requestDetails = encoder.convert(
+    {
+      'requestUrl': request.url,
+      'request': Uri.parse(request.getUrlWithParams()).toString(),
+      'headers': request.getHeaders(),
+      'body': request.getBody(),
+      'resultBody': response.body,
+    },
+  );
+
+  // if we have an error -> show error logging
+  switch (logType) {
+    case FetchTrayLogLevel.info:
+      logger.i('${message ?? 'FetchTray Info'}\n\n$requestDetails');
+      break;
+    case FetchTrayLogLevel.warning:
+      logger.w(requestDetails, message ?? 'FetchTray Warning', stackTrace);
+      break;
+    case FetchTrayLogLevel.error:
+      logger.e(requestDetails, message ?? 'FetchTray Error', stackTrace);
+      break;
+  }
 }

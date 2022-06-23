@@ -208,9 +208,21 @@ final user = await makeTrayRequest<User>(fetchUserRequest);
 print('The username: ${user.name}');
 ```
 
+**Advanced options:**
+
+```dart
+  final user = await makeTrayRequest<User>(
+    // the request class
+    fetchUserRequest
+    // debugLevel to get output in the console and debug requests, that are not working (by default will be the global setting in your TrayRequest
+    // can also be used in the hooks the same way
+    requestDebugLevel: FetchTrayDebugLevel.errors,
+  );
+```
+
 #### `useMakeTrayRequest` hook
 
-Use the `useMakeTrayRequest` hook, is very similar to `makeTrayRequest`:
+Use the `useMakeTrayRequest` hook, is very similar to `makeTrayRequest`, but a hook version:
 
 ```dart
 // user_detail_screen.dart
@@ -363,6 +375,15 @@ class MyApiTrayRequest<ResultType> extends TrayRequest<ResultType> {
       params: {
         'supersecrettoken': 'should_not_really_be_passed_here',
       },
+
+      // defines the global log output, you want to show.
+      // by changing this value you can:
+      // 
+      // - FetchTrayDebugLevel.none: Log nothing out (not even errors)
+      // - FetchTrayDebugLevel.onlyErrors: Log only errors and fatal exceptions to console
+      // - FetchTrayDebugLevel.errorsAndWarnings: Log all errors and warnings
+      // - FetchTrayDebugLevel.everything: Log everything (errors, warnings, info) - this is great for debugging and fixing stuff, but probably too much, when you are working on something other than your requests.
+      debugLevel: FetchTrayDebugLevel.errors,
     );
   }
 }
