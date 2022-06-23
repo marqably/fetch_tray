@@ -10,8 +10,9 @@ import 'make_tray_testing_request.mocks.dart';
 @GenerateMocks([http.Client])
 Future<TrayRequestResponse<ModelType>> makeTrayTestingRequest<ModelType>(
   TrayRequest request,
-  TrayRequestMock mock,
-) async {
+  TrayRequestMock mock, {
+  FetchTrayDebugLevel? requestDebugLevel = FetchTrayDebugLevel.none,
+}) async {
   // create the mock client
   final mockClient = MockClient();
 
@@ -31,5 +32,9 @@ Future<TrayRequestResponse<ModelType>> makeTrayTestingRequest<ModelType>(
   );
 
   // make request
-  return makeTrayRequest(request, client: mockClient,);
+  return makeTrayRequest(
+    request,
+    client: mockClient,
+    requestDebugLevel: requestDebugLevel,
+  );
 }

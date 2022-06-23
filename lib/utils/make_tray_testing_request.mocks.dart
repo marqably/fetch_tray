@@ -87,8 +87,7 @@ class MockClient extends i1.Mock implements i4.Client {
       (super.noSuchMethod(Invocation.method(#read, [url], {#headers: headers}),
           returnValue: Future<String>.value('')) as i5.Future<String>);
   @override
-  i5.Future<i7.Uint8List> readBytes(Uri? url,
-          {Map<String, String>? headers}) =>
+  i5.Future<i7.Uint8List> readBytes(Uri? url, {Map<String, String>? headers}) =>
       (super.noSuchMethod(
               Invocation.method(#readBytes, [url], {#headers: headers}),
               returnValue: Future<i7.Uint8List>.value(i7.Uint8List(0)))

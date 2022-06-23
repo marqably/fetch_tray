@@ -22,9 +22,7 @@ void main() {
           element = context as HookElement;
           final hookResult = useMakeTrayRequest<TrayRequest, MockUser>(
             mockRequest,
-            mock: TrayRequestMock(
-              '{"id": 1, "email": "test@example.com"}'
-            ),
+            mock: TrayRequestMock('{"id": 1, "email": "test@example.com"}'),
           );
 
           response = hookResult.data;
@@ -35,7 +33,7 @@ void main() {
 
       // in the first stage -> nothing was fetched yet -> so response should be null
       expect(response, null);
-      // expect(element.dirty, false);
+      expect(element.dirty, false);
 
       await tester.pump(const Duration());
 
@@ -45,7 +43,7 @@ void main() {
       // check for correctly set properties
       expect(response?.id, 1);
       expect(response?.email, 'test@example.com');
-      // expect(element.dirty, false);
+      expect(element.dirty, false);
 
       await tester.pump(const Duration());
     });
@@ -96,7 +94,10 @@ void main() {
         builder: (context) {
           hookResult = useMakeTrayRequest<TrayRequest, MockUser>(
             mockRequest,
-            mock: TrayRequestMock('{"message": "not allowed", "errors": ["no access to this resource"]}', statusCode: 410,),
+            mock: TrayRequestMock(
+              '{"message": "not allowed", "errors": ["no access to this resource"]}',
+              statusCode: 410,
+            ),
           );
 
           return Container();

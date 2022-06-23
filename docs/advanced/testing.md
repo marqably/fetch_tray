@@ -49,12 +49,10 @@ Testing requests is made easier using our `TrayRequestMock` object.
 You can just pass this object to the `makeTrayRequest` method using the `mock` parameter and `fetch_tray` will take care of mocking it correctly.
 
 ```dart
-import 'package:donation_causes/data/models/cause.dart';
-import 'package:donation_causes/data/requests/fetch_user_request.dart';
+import 'package:my_package/data/models/user.dart';
+import 'package:my_package/data/requests/fetch_user_request.dart';
 import 'package:fetch_tray/fetch_tray.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../mockdata/cause_mockdata.dart';
 
 void main() {
   group('fetch_user_request', () {

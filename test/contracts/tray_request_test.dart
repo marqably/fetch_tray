@@ -32,7 +32,8 @@ void main() {
 
     /// it should be possible to have a combination of path and query params
     /// if a param was already used as a path param, it should not be used in query
-    test('url with query params and path params is created successfully', () async {
+    test('url with query params and path params is created successfully',
+        () async {
       const exampleUrl = 'https://www.example.com/users/:id';
 
       final request = TrayRequest(

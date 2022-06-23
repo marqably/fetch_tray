@@ -10,9 +10,9 @@ class TestWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return ProviderScope(
       child: MaterialApp(
-            home: Scaffold(
-              body: child,
-            ),
+        home: Scaffold(
+          body: child,
+        ),
       ),
     );
   }

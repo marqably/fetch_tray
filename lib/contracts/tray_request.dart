@@ -89,5 +89,4 @@ class TrayRequest<T> {
   void afterSuccess(TrayRequestResponse result) {
     // do something after saving
   }
-
 }

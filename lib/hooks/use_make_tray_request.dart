@@ -45,7 +45,7 @@ TrayRequestHookResponse<RequestType, ResultType>
   http.Client? client,
   TrayRequestMock? mock,
   bool lazyRun = false,
-  FetchTrayDebugLevel? requestDebugLevel,
+  FetchTrayDebugLevel? requestDebugLevel = FetchTrayDebugLevel.none,
 }) {
   final fetchResult =
       useState<TrayRequestHookResponse<RequestType, ResultType>>(
@@ -87,7 +87,11 @@ TrayRequestHookResponse<RequestType, ResultType>
 
     // if we are in mocking mode -> take `makeTrayTestingRequest` otherwise use `makeTrayRequest`
     final makeTrayRequestMethod = (mock != null)
-        ? makeTrayTestingRequest(theRequest, mock)
+        ? makeTrayTestingRequest(
+            theRequest,
+            mock,
+            requestDebugLevel: requestDebugLevel,
+          )
         : makeTrayRequest(theRequest,
             client: client, requestDebugLevel: requestDebugLevel);
 

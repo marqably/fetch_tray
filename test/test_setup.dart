@@ -1,4 +1,3 @@
-
 Future<void> setupDependencyInjection() async {
   // await initAdditionalServices(
   //   navigationPathConfig: navigationPaths,
@@ -13,5 +12,4 @@ Future<void> setupDependencyInjection() async {
   // );
 }
 
-Future<void> closeDependencyInjection() async {
-}
+Future<void> closeDependencyInjection() async {}

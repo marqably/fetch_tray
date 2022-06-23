@@ -339,6 +339,7 @@ void main() {
       final exampleResult = await makeTrayRequest<MockUser>(
         mockRequest,
         client: mockClient,
+        requestDebugLevel: FetchTrayDebugLevel.none,
       );
 
       // check for correct result type
