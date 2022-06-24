@@ -31,7 +31,7 @@ flutter pub get
 
 This libraries goal is to abstract every REST endpoint into it's own `TrayRequest` class, that defines all the basic information, so it can just be used by calling `makeTrayRequest` with the specific endpoint TrayRequest class combined with the needed `params`, `headers` and `body` parameters.
 
-![Overview of basic approach](./docs/assets/fetch_tray_overview.png)
+![Overview of basic approach](./doc/assets/fetch_tray_overview.png)
 
 ### Real life example
 
@@ -316,7 +316,7 @@ In fact, by creating your `FetchUserRequest` above you extended the `TrayRequest
 
 Here is a quick overview of what we are going to do.
 
-![Overview of environment approach](./docs/assets/fetch_tray_environment_overview.png)
+![Overview of environment approach](./doc/assets/fetch_tray_environment_overview.png)
 
 So basically our goal is to create our own `custom base request class` instead of `TrayRequest`.
 This new `custom base request class` is going to define it's own `TrayEnvironment` with all the "static" request options, that all of our requests will build upon.
@@ -452,7 +452,7 @@ class FetchUserRequest extends MyApiTrayRequest<User> {
 ### Testing your models, requests, hooks
 
 FetchTray is fully testable and makes it very easy to set everything up.
-[How to test](./docs/advanced/testing.md)
+[How to test](./doc/advanced/testing.md)
 
 ## Contributing
 
