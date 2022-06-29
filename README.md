@@ -10,13 +10,13 @@ It also includes simple `flutter_hooks` support.
 Although we use fetch tray in production already, the docs and some of the features are still in development!
 We appreciate any support and PRs.
 
-## Getting Started
+## Getting started
 
-Start by adding the package to pub get:
+Start by adding the package to your `pubspec.yaml`:
 
 ```yaml
-  fetch_tray:
-    path: ./packages/fetch_tray
+dependencies:
+  fetch_tray: ^0.0.3
 ```
 
 Run pub get to install dependencies:
