@@ -1,22 +1,22 @@
 # fetch_tray
 
-A library to abstract and help with http api requests.
+A library to abstract and help with HTTP API requests.
 Strictly typed, flexible and fully testable.
 
 It also includes simple `flutter_hooks` support.
 
-## !! Warning: Still a work in progress
+## ⚠ Warning: Still a work in progress
 
 Although we use fetch tray in production already, the docs and some of the features are still in development!
-We appreciate any support and MRs.
+We appreciate any support and PRs.
 
-## Getting Started
+## Getting started
 
-Start by adding the package to pub get:
+Start by adding the package to your `pubspec.yaml`:
 
 ```yaml
-  fetch_tray:
-    path: ./packages/fetch_tray
+dependencies:
+  fetch_tray: ^0.0.3
 ```
 
 Run pub get to install dependencies:
@@ -64,9 +64,9 @@ class User {
     this.signupDate,
   });
 
-  // and every model needs the `fromJson` method, to make sure we can parse the api json output
+  // and every model needs the `fromJson` method, to make sure we can parse the API json output
   // and create an instance of this model class out of it
-  // this is also the place, where you could make transformations between your api and flutter
+  // this is also the place, where you could make transformations between your API and flutter
   // (think like datetime conversions, ...)
   factory User.fromJson(Map<String, dynamic> json) {
     return MockUser(
@@ -81,11 +81,11 @@ class User {
 
 ## Creating the request
 
-The next thing, we need to do is to create a request for each api endpoint.
-Every one of these request classes is going to be a "basic configuration" for each api endpoint within our application.
+The next thing we need to do is creating a request for each API endpoint.
+Every one of these request classes is going to be a "basic configuration" for each API endpoint within our application.
 
-This gives us a good overview of all of the api endpoints, we really use.
-And allows us to easily reuse api configuration classes, without having to repeat ourselves.
+This gives us a good overview of all of the API endpoints, we really use.
+And allows us to easily reuse API configuration classes, without having to repeat ourselves.
 
 The goal of this is to just be able to call `makeTrayRequest()` and pass the configuration and everything is done, converted and validated in by `fetch_tray` for you.
 
@@ -116,7 +116,7 @@ class FetchUserRequest extends TrayRequest<User> {
   // if you don't need any custom headers, body, params, ... you can also leave these fields out
   super(
           // the url is a required property.
-          // this is going to be the api endpoint, that is called.
+          // this is going to be the API endpoint, that is called.
           // you can use placeholders in the form of `:PARAM_KEY`
           // if a `params` entry exists with this key, this will be replaced automatically by fetch_tray
           url: 'https://www.example.com/api/user/:userId',
@@ -129,7 +129,7 @@ class FetchUserRequest extends TrayRequest<User> {
           // this way you can create one request to fetch users, but when you call it, you can 
           // change the user_id within the url.
           // 
-          // if you use params, that match a placeholder in the api url above, they will be used within the path.
+          // if you use params, that match a placeholder in the API url above, they will be used within the path.
           // if they are not in the path, they will just be attached to the url as query params in the form `?paramKey=paramValue&...`
           params: {
             ...params,
@@ -323,9 +323,9 @@ This new `custom base request class` is going to define it's own `TrayEnvironmen
 
 Then everyone of our requests will extend this `custom base request class` instead of the `TrayRequest` class by default and therefore get all the environment settings.
 
-The good thing about this approach is, that we will have all the basic configuration details in one place, but still keep all the flexibility of having different api requests with different urls, headers, ... .
+The good thing about this approach is, that we will have all the basic configuration details in one place, but still keep all the flexibility of having different API requests with different urls, headers, ... .
 
-If you are polling multiple apis for example, you could just create multiple environment `base request classes` and then in your `request class` extend the correct one.
+If you are polling multiple APIs for example, you could just create multiple environment `base request classes` and then in your `request class` extend the correct one.
 
 ## Creating a new `custom base request class`
 
@@ -389,7 +389,7 @@ class MyApiTrayRequest<ResultType> extends TrayRequest<ResultType> {
 }
 ```
 
-### creating our specific endpoint request
+### Creating our specific endpoint request
 
 Now that we have our base environment, we can adjust the `FetchUserRequest` class and we will have to define less there:
 
@@ -404,7 +404,7 @@ import './my_api_tray_request.dart';
 // we first import the user model, we just created
 import './user.dart';
 
-// now instead of extending `TrayRequest` like we did above, we will extend our custom api request method.
+// now instead of extending `TrayRequest` like we did above, we will extend our custom API request method.
 // this will make sure our `FetchUserRequest` will inherit the TrayEnvironment we created.
 class FetchUserRequest extends MyApiTrayRequest<User> {
   FetchUserRequest({
@@ -439,13 +439,13 @@ class FetchUserRequest extends MyApiTrayRequest<User> {
 
 ### Hooks
 
-// TODO: add details about hooks ike the afterSuccess hook
+// TODO: add details about hooks like the `afterSuccess` hook
 
-### Fetchmore and Pagination
+### Fetch more and pagination
 
 // TODO: fill everything out and explain how it works with fetch parameter, custom RequestTypes with copyWith, and fetchParser
 
-## Breaking changes not in Readme
+## Breaking changes not in README
 
 // TODO: Change requests to include RequestType instead of only ResponseType definition
 
@@ -456,15 +456,14 @@ FetchTray is fully testable and makes it very easy to set everything up.
 
 ## Contributing
 
-We are looking forward to contributions, bugfixes, documentation improvements for this package.
-Please provide descriptive information in your Merge Requests and make sure to write tests and respect and address linting problem, before you do so.
+We are looking forward to contributions, bugfixes, documentation improvements, ... for this package.
+Please provide descriptive information in your pull requests and make sure to write tests and respect and address linting problem before you do so.
 
-We will review and merge MRs.
+We will review and merge PRs.
 
 ## TODOS
 
 * [] add docs for `lazyRun` parameter and post hooks
-
 * [] add docs POST (requestBody) behavior [example is currently in `tests/create_mock_user_request.dart`]
 * [] add docs fetching a list of entities [example is currently in `tests/fetch_mock_user_list_request.dart`]
 * [] prepare example folder with full example
