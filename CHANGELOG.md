@@ -21,3 +21,7 @@
 ## 0.0.5
 
 * Added `getParams` method to `TrayRequest` to be able to customize more complex param combinations
+
+## 0.0.6
+
+* Added `requestParams` param to `getParams` method in `TrayRequest`

@@ -37,8 +37,8 @@ class TrayRequest<T> {
 
   /// a method that allows us to customize even complex params generations
   /// by default, we just return the params passed to the request here.
-  Map<String, String>? getParams() {
-    return params;
+  Map<String, String>? getParams(Map<String, String> requestParams) {
+    return requestParams;
   }
 
   /// parses the params and makes sure they are either inserted into the
@@ -46,7 +46,8 @@ class TrayRequest<T> {
   /// be added as query params
   String getUrlWithParams() {
     // get the combined params of client and request
-    final combinedParams = getEnvironment().getCombinedParams(getParams());
+    final combinedParams =
+        getEnvironment().getCombinedParams(getParams(params ?? {}));
 
     // if no params given -> nothing to do
     if (combinedParams.isEmpty) {
