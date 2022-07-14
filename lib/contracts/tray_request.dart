@@ -11,7 +11,7 @@ class TrayRequest<T> {
   final MakeRequestMethod method;
 
   TrayRequest({
-    required this.url,
+    this.url = '/',
     this.params,
     this.body,
     this.method = MakeRequestMethod.get,
@@ -29,6 +29,12 @@ class TrayRequest<T> {
     return;
   }
 
+  /// a method that allows us to customize even complex url generations
+  /// by default, we just return the url passed to the request here.
+  String getUrl() {
+    return url;
+  }
+
   /// parses the params and makes sure they are either inserted into the
   /// path (if used like `/user/:var1/:var2/`) or if not defined there, they will
   /// be added as query params
@@ -38,11 +44,11 @@ class TrayRequest<T> {
 
     // if no params given -> nothing to do
     if (combinedParams.isEmpty) {
-      return getEnvironment().baseUrl + url;
+      return getEnvironment().baseUrl + getUrl();
     }
 
     // otherwise loop through the combinedParams and try to replace or add the combinedParams
-    String retUrl = getEnvironment().baseUrl + url;
+    String retUrl = getEnvironment().baseUrl + getUrl();
     List<String> queryParams = [];
     for (var paramKey in combinedParams.keys) {
       // if the param key is defined within our url -> replace it there

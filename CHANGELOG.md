@@ -13,3 +13,7 @@
 ## 0.0.3
 
 * Added no debug logging as default for test runs
+
+## 0.0.4
+
+* Added `getUrl` method to `TrayRequest` to be able to customize more complex URL patterns
