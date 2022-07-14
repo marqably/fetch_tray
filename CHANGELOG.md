@@ -17,3 +17,7 @@
 ## 0.0.4
 
 * Added `getUrl` method to `TrayRequest` to be able to customize more complex URL patterns
+
+## 0.0.5
+
+* Added `getParams` method to `TrayRequest` to be able to customize more complex param combinations

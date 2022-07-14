@@ -35,12 +35,18 @@ class TrayRequest<T> {
     return url;
   }
 
+  /// a method that allows us to customize even complex params generations
+  /// by default, we just return the params passed to the request here.
+  Map<String, String>? getParams() {
+    return params;
+  }
+
   /// parses the params and makes sure they are either inserted into the
   /// path (if used like `/user/:var1/:var2/`) or if not defined there, they will
   /// be added as query params
   String getUrlWithParams() {
     // get the combined params of client and request
-    final combinedParams = getEnvironment().getCombinedParams(params);
+    final combinedParams = getEnvironment().getCombinedParams(getParams());
 
     // if no params given -> nothing to do
     if (combinedParams.isEmpty) {
