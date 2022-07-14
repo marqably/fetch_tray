@@ -25,3 +25,7 @@
 ## 0.0.6
 
 * Added `requestParams` param to `getParams` method in `TrayRequest`
+
+## 0.0.7
+
+* Fixed `Response` json encoding to utf-8 for testing tray responses, to fix error issue with non latin json contents.
