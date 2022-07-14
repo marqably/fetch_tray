@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -28,6 +30,9 @@ Future<TrayRequestResponse<ModelType>> makeTrayTestingRequest<ModelType>(
     (_) async => http.Response(
       mock.result,
       mock.statusCode,
+      headers: {
+        HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+      },
     ),
   );
 
