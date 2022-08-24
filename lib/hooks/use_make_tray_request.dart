@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:fetch_tray/contracts/tray_request_metadata.dart';
 import 'package:fetch_tray/contracts/tray_environment.dart';
 import 'package:fetch_tray/contracts/tray_request.dart';
 import 'package:fetch_tray/utils/make_tray_request.dart';
@@ -11,29 +12,62 @@ import 'package:mockito/mockito.dart';
 
 import './use_make_tray_request.mocks.dart';
 
+typedef UseMakeRequestFetchMethod<RequestType extends TrayRequest, ResultType>
+    = Future<TrayRequestHookResponse<RequestType, ResultType>?> Function([
+  RequestType? request,
+  TrayRequestFetchParser<ResultType>? fetchParser,
+]);
+
 typedef TrayRequestFetchParser<ResultType> = ResultType Function(
     ResultType? oldData, ResultType newData);
 
 @GenerateMocks([http.Client])
 class TrayRequestHookResponse<RequestType extends TrayRequest, ResultType> {
-  final Future<TrayRequestHookResponse<RequestType, ResultType>?> Function([
-    RequestType? request,
-    TrayRequestFetchParser<ResultType>? fetchParser,
-  ]) fetch;
+  final UseMakeRequestFetchMethod<RequestType, ResultType> fetch;
+  final bool fetchMoreLoading;
   final bool loading;
+  final TrayRequestMetadata metadata;
   final ResultType? data;
   final TrayRequestError? error;
   final RequestType request;
   final Future<void> Function()? refetch;
+  final Future<void> Function()? fetchMore;
 
   TrayRequestHookResponse({
     required this.refetch,
+    required this.fetchMore,
     required this.fetch,
     required this.request,
+    required this.metadata,
     this.error,
     this.loading = true,
+    this.fetchMoreLoading = false,
     this.data,
   });
+
+  TrayRequestHookResponse<RequestType, ResultType> copyWith({
+    bool? loading,
+    bool? fetchMoreLoading,
+    TrayRequestMetadata? metadata,
+    ResultType? data,
+    TrayRequestError? error,
+    RequestType? request,
+    UseMakeRequestFetchMethod<RequestType, ResultType>? fetch,
+    Future<void> Function()? refetch,
+    Future<void> Function()? fetchMore,
+  }) {
+    return TrayRequestHookResponse(
+      refetch: refetch ?? this.refetch,
+      fetchMore: fetchMore ?? this.fetchMore,
+      fetch: fetch ?? this.fetch,
+      request: request ?? this.request,
+      metadata: metadata ?? this.metadata,
+      error: error ?? this.error,
+      loading: loading ?? this.loading,
+      fetchMoreLoading: fetchMoreLoading ?? this.fetchMoreLoading,
+      data: data ?? this.data,
+    );
+  }
 }
 
 /// a simple hook to make an http request
@@ -53,8 +87,10 @@ TrayRequestHookResponse<RequestType, ResultType>
       fetch: ([newRequest, fetchParser]) async {
         return null;
       },
+      metadata: defaultTrayRequestMetadata,
       refetch: null,
       request: request,
+      fetchMore: null,
     ),
   );
 
@@ -81,6 +117,7 @@ TrayRequestHookResponse<RequestType, ResultType>
     bool force = false,
     RequestType? customRequest,
     TrayRequestFetchParser<ResultType>? fetchParser,
+    bool isFetchMore = false,
   ]) async {
     // make it possible to overwrite custom request (if needed - used for example for fetch for new pages)
     final theRequest = customRequest ?? request;
@@ -92,27 +129,97 @@ TrayRequestHookResponse<RequestType, ResultType>
             mock,
             requestDebugLevel: requestDebugLevel,
           )
-        : makeTrayRequest(theRequest,
-            client: client, requestDebugLevel: requestDebugLevel);
+        : makeTrayRequest(
+            theRequest,
+            client: client,
+            requestDebugLevel: requestDebugLevel,
+          );
+
+    // define our fetch again method
+    Future<TrayRequestHookResponse<RequestType, ResultType>> fetchAgainMethod([
+      RequestType? newCustomRequest,
+      TrayRequestFetchParser<ResultType>? fetchParser,
+    ]) async {
+      if (fetchResult.value.loading != true) {
+        fetchResult.value = fetchResult.value.copyWith(loading: true);
+      }
+
+      // fetch the request
+      return fetchRequest(
+        true,
+        newCustomRequest,
+        fetchParser,
+      );
+    }
+
+    // define our refetch method
+    Future<TrayRequestHookResponse<RequestType, ResultType>> refetchMethod([
+      RequestType? newCustomRequest,
+    ]) {
+      fetchResult.value = fetchResult.value.copyWith(loading: true);
+
+      return fetchRequest(
+        true,
+        newCustomRequest,
+        fetchParser,
+      );
+    }
 
     return makeTrayRequestMethod.then((response) {
-      fetchResult.value = TrayRequestHookResponse<RequestType, ResultType>(
-        // if we got a custom fetch parser -> pass old and new data and take the result
-        data: (fetchParser != null)
-            ? fetchParser(fetchResult.value.data, response.data)
-            : response.data,
+      // if we got a custom fetch parser -> pass old and new data and take the result
+      final newDataDefined = (fetchParser != null)
+          ? fetchParser(fetchResult.value.data, response.data)
+          : response.data;
+
+      // depending on whether this is a reset or a fetch more -> use the old data or try to combine data
+      final newData = (isFetchMore)
+          ? request.mergePaginatedResults(
+              fetchResult.value.data,
+              newDataDefined,
+            )
+          : newDataDefined;
+
+      // get the pagination metadata
+      final metadata =
+          theRequest.generateMetaData(request, response.dataRaw ?? {});
+
+      // set the new state
+      final newResponse = TrayRequestHookResponse<RequestType, ResultType>(
+        data: newData,
         error: response.error,
         request: theRequest,
         loading: false,
-        refetch: () => fetchRequest(true),
-        fetch: ([
-          RequestType? newCustomRequest,
-          TrayRequestFetchParser<ResultType>? fetchParser,
-        ]) =>
-            fetchRequest(true, newCustomRequest, fetchParser),
+        fetchMoreLoading: false,
+        metadata: metadata,
+        refetch: refetchMethod,
+        // TODO: add test for fetchMore
+        fetchMore: () {
+          // set the loading state
+          fetchResult.value = fetchResult.value.copyWith(
+            fetchMoreLoading: true,
+          );
+
+          // make the request
+          return fetchRequest(
+            true,
+            request.pagination<RequestType>(request).fetchMoreRequest(),
+            fetchParser,
+            true,
+          );
+        },
+        fetch: fetchAgainMethod,
       );
 
-      return fetchResult.value;
+      try {
+        fetchResult.value = newResponse;
+
+        return fetchResult.value;
+      } catch (e) {
+        // if the fetchResult state does not exist anymore (hook was unmounted) -> just return without setting the state
+        // we have to find a cleaner solution for this, but for now it works and does not produce errors.
+        // need to check for possible memory leaks though
+        return newResponse;
+      }
     }).catchError((error, stacktrace) {
       // log error
       log(
@@ -124,20 +231,19 @@ TrayRequestHookResponse<RequestType, ResultType>
       // in case there was an uncatchable error -> handle it and turn it into our format
       fetchResult.value = TrayRequestHookResponse<RequestType, ResultType>(
         loading: false,
+        fetchMoreLoading: false,
         request: request,
         error: TrayRequestError(
           message: error.toString(),
           errors: [],
           statusCode: 500,
         ),
+        metadata: defaultTrayRequestMetadata,
+        fetchMore: null,
         // TODO: add test for refetching
-        refetch: () => fetchRequest(true),
+        refetch: refetchMethod,
         // TODO: add test for lazy fetching
-        fetch: ([
-          RequestType? newCustomRequest,
-          TrayRequestFetchParser<ResultType>? fetchParser,
-        ]) =>
-            fetchRequest(true, newCustomRequest, fetchParser),
+        fetch: fetchAgainMethod,
       );
 
       return fetchResult.value;
@@ -155,15 +261,22 @@ TrayRequestHookResponse<RequestType, ResultType>
         ]) =>
             fetchRequest(true, newCustomRequest, fetchParser),
         refetch: null,
+        fetchMore: null,
+        metadata: defaultTrayRequestMetadata,
         request: request,
       );
 
-      return;
+      return () {
+        fetchResult.removeListener(() {});
+      };
     }
 
     // make the request and then change the state
     fetchRequest(false);
-    return null;
+
+    return () {
+      fetchResult.removeListener(() {});
+    };
   }, []);
 
   return fetchResult.value;

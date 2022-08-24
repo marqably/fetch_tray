@@ -443,7 +443,7 @@ class FetchUserRequest extends MyApiTrayRequest<User> {
 
 ### Fetch more and pagination
 
-// TODO: fill everything out and explain how it works with fetch parameter, custom RequestTypes with copyWith, and fetchParser
+See more in the [pagination section](./doc/advanced/pagination.md)
 
 ## Breaking changes not in README
 
@@ -461,8 +461,9 @@ Please provide descriptive information in your pull requests and make sure to wr
 
 We will review and merge PRs.
 
-## TODOS
+## TODO
 
+* [] add tests for `refetching` and `fetchMore`
 * [] add docs for `lazyRun` parameter and post hooks
 * [] add docs POST (requestBody) behavior [example is currently in `tests/create_mock_user_request.dart`]
 * [] add docs fetching a list of entities [example is currently in `tests/fetch_mock_user_list_request.dart`]

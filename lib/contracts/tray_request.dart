@@ -1,6 +1,11 @@
+import 'dart:developer';
+
 import 'package:fetch_tray/contracts/tray_environment.dart';
 import 'package:fetch_tray/contracts/tray_request_body.dart';
+import 'package:fetch_tray/contracts/tray_request_metadata.dart';
 import 'package:fetch_tray/utils/make_tray_request.dart';
+
+import '../pagination_drivers/fetch_tray_pagination_driver.dart';
 
 class TrayRequest<T> {
   final String url;
@@ -9,6 +14,7 @@ class TrayRequest<T> {
   final TrayRequestBody? body;
   final Map<String, String>? headers;
   final MakeRequestMethod method;
+  Map<String, String> overwriteParams = {};
 
   TrayRequest({
     this.url = '/',
@@ -37,8 +43,16 @@ class TrayRequest<T> {
 
   /// a method that allows us to customize even complex params generations
   /// by default, we just return the params passed to the request here.
-  Map<String, String>? getParams(Map<String, String> requestParams) {
-    return requestParams;
+  Map<String, String> getParamsRaw(
+      [Map<String, String> customParams = const {}]) {
+    return {...(params ?? {}), ...(customParams), ...overwriteParams};
+  }
+
+  /// a method that allows us to customize even complex params generations
+  /// by default, we just return the params passed to the request here.
+  Map<String, String>? getParams(
+      [Map<String, String> requestParams = const {}]) {
+    return getParamsRaw(requestParams);
   }
 
   /// parses the params and makes sure they are either inserted into the
@@ -46,8 +60,13 @@ class TrayRequest<T> {
   /// be added as query params
   String getUrlWithParams() {
     // get the combined params of client and request
-    final combinedParams =
+    final clientAndRequestParams =
         getEnvironment().getCombinedParams(getParams(params ?? {}));
+
+    // make sure that our overwrite sticks (it is possible, that the `getParams` method was overwritten,
+    // but we still want to have the overwrite at the very end, but also when somebody wants to
+    // return the `getParams` method. This is why we have it in there twice.)
+    final combinedParams = {...clientAndRequestParams, ...overwriteParams};
 
     // if no params given -> nothing to do
     if (combinedParams.isEmpty) {
@@ -101,5 +120,37 @@ class TrayRequest<T> {
   /// this is a hook, that can be overwritten to perform actions, after the request has been done successfully
   void afterSuccess(TrayRequestResponse result) {
     // do something after saving
+  }
+
+  // #### PAGINATION
+
+  /// A method to access the pagination provider defined for this request
+  /// The provider contains normalized pagination methods like fetchMore, ...
+  FetchTrayPaginationDriver<RequestType, T>
+      pagination<RequestType extends TrayRequest>(RequestType request) {
+    return FetchTrayPaginationDriver<RequestType, T>(request);
+  }
+
+  /// Defines the way paginated results should be combined
+  /// This method should be implemented in the request itself.
+  /// This is just a fallback, to throw an error if not implemented correctly.
+  T mergePaginatedResults(T currentData, T newData) {
+    // just return default data and throw warning
+    log(
+      'Please implement the mergePaginatedResults method in your request, to combine paginated results correctly.',
+      name: 'fetch_tray',
+    );
+    return [] as T;
+  }
+
+  TrayRequestMetadata generateMetaData<RequestType extends TrayRequest>(
+      RequestType request, dynamic responseJson) {
+    // just return default data and throw warning
+    log(
+      'Please implement the mergePaginatedResults method in your request, to combine paginated results correctly.',
+      name: 'fetch_tray',
+    );
+
+    return defaultTrayRequestMetadata;
   }
 }

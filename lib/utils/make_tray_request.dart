@@ -80,10 +80,12 @@ class TrayRequestError {
 /// the response class of a tray request, containing either the data or an error object
 class TrayRequestResponse<ResultType> {
   final ResultType? data;
+  final dynamic dataRaw;
   final TrayRequestError? error;
 
   TrayRequestResponse({
     this.error,
+    this.dataRaw,
     this.data,
   });
 }
@@ -144,11 +146,14 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
 
     // if response successful -> parse it and return
     if (validStatuses.contains(response.statusCode)) {
+      final responseJson = jsonDecode(response.body);
+
       return Future(() {
         final trayRequestResponse = TrayRequestResponse<ModelType>(
           data: request.getModelFromJson(
-            jsonDecode(response.body),
+            responseJson,
           ),
+          dataRaw: responseJson,
         );
 
         // call after success hook
@@ -156,6 +161,24 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
 
         // return it
         return trayRequestResponse;
+      }).catchError((err) {
+        // log error
+        logRequest(
+          message:
+              'FETCH TRAY EXCEPTION: Could not convert the code to json! ${err.toString()}',
+          logType: FetchTrayLogLevel.error,
+          requestDebugLevel: requestDebugLevel,
+          request: request,
+          response: response,
+        );
+
+        return TrayRequestResponse<ModelType>(
+          error: request.getEnvironment().parseErrorDetails(
+            request,
+            response,
+            {'rawJson': response.body},
+          ),
+        );
       });
     }
 
