@@ -1,35 +1,42 @@
+import '../contracts/tray_request.dart';
+import 'fetch_tray_pagination_driver.dart';
 
-// class PagePaginationDriver<RequestType extends TrayRequest, ResultType>
-//     extends FetchTrayPaginationDriver<RequestType, ResultType> {
-//   PagePaginationDriver(request) : super(request);
+class PagePaginationDriver<RequestType extends TrayRequest, ResultType>
+    extends FetchTrayPaginationDriver<RequestType, ResultType> {
+  PagePaginationDriver(
+    RequestType request, {
+    this.firstPage = 1,
+    this.pageProperty = 'page',
+  }) : super(request);
 
-//   /// Defines whether the first page starts with 0 or 1 (depending on the api, this can differ)
-//   static const firstPage = 1;
+  /// Defines whether the first page starts with 0 or 1 (depending on the api, this can differ)
+  final int firstPage;
 
-//   /// Defines the property key used to pass the page to the request url
-//   /// This is used for pagination to increase the page inside of the `fetchMore` method.
-//   static const pageProperty = 'page';
+  /// Defines the property key used to pass the page to the request url
+  /// This is used for pagination to increase the page inside of the `fetchMore` method.
+  final String pageProperty;
 
-//   /// This method defines the way we determine whether our current request has more data to fetch.
-//   @override
-//   fetchMoreRequest<RequestTypeT>() {
-//     // take current parameters and add the page property
-//     final newParams = {...(request.params ?? <String, String>{})};
+  /// Defines the property key used to pass the page to the request url
+  /// This is used for pagination to increase the page inside of the `fetchMore` method.
+  String paginationProperty() {
+    return 'page';
+  }
 
-//     // now change the page property to the next page
-//     newParams[pageProperty] =
-//         (int.parse(newParams[pageProperty] ?? firstPage.toString()) + 1)
-//             .toString();
+  /// This method defines the way we determine whether our current request has more data to fetch.
+  @override
+  RequestType fetchMoreRequest() {
+    // get current params
+    final currentParmas = request.getParams();
 
-//     // now put it back together
-//     return request.copyWith<RequestTypeT>(
-//       params: newParams,
-//     );
-//   }
+    // get the next page
+    final nextPage = int.parse(
+            currentParmas?[paginationProperty()] ?? firstPage.toString()) +
+        1;
 
-//   /// This method defines the way we determine whether our current request has more data to fetch.
-//   @override
-//   bool hasMorePages(TrayRequestResponse result) {
-//     return false;
-//   }
-// }
+    request.overwriteParams = {
+      paginationProperty(): nextPage.toString(),
+    };
+
+    return request;
+  }
+}
