@@ -8,6 +8,8 @@ export './hooks/use_make_lazy_tray_request.dart';
 export './utils/make_tray_request.dart';
 export './utils/make_tray_testing_request.dart';
 export './interfaces/paginatable.dart';
+export './pagination_drivers/fetch_tray_pagination_driver.dart';
+export './pagination_drivers/page_pagination_driver.dart';
 
 // export http client to make it easier to import it
 typedef HttpClient = http.Client;
