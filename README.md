@@ -16,7 +16,7 @@ Start by adding the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  fetch_tray: ^0.0.3
+  fetch_tray:
 ```
 
 Run pub get to install dependencies:
