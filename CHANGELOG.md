@@ -29,3 +29,7 @@
 ## 0.0.7
 
 * Fixed `Response` json encoding to utf-8 for testing tray responses, to fix error issue with non latin json contents.
+
+## 0.0.8
+
+* Added `fetchMore` method
