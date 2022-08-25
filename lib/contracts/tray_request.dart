@@ -14,7 +14,7 @@ class TrayRequest<T> {
   final TrayRequestBody? body;
   final Map<String, String>? headers;
   final MakeRequestMethod method;
-  Map<String, String> overwriteParams = {};
+  Map<String, String?> overwriteParams = {};
 
   TrayRequest({
     this.url = '/',
@@ -44,8 +44,24 @@ class TrayRequest<T> {
   /// a method that allows us to customize even complex params generations
   /// by default, we just return the params passed to the request here.
   Map<String, String> getParamsRaw(
-      [Map<String, String> customParams = const {}]) {
-    return {...(params ?? {}), ...(customParams), ...overwriteParams};
+      [Map<String, String?> customParams = const {}]) {
+    final overwritingParams = {...(customParams), ...overwriteParams};
+    final returnParams = {
+      ...(params ?? {}),
+    };
+
+    // now loop through params and overwrite or remove (if value is null) value
+    for (final key in overwritingParams.keys) {
+      if (overwritingParams[key] == null) {
+        if (returnParams.containsKey(key)) {
+          returnParams.remove(key);
+        }
+      } else {
+        returnParams[key] = overwritingParams[key]!;
+      }
+    }
+
+    return returnParams;
   }
 
   /// a method that allows us to customize even complex params generations
@@ -77,6 +93,11 @@ class TrayRequest<T> {
     String retUrl = getEnvironment().baseUrl + getUrl();
     List<String> queryParams = [];
     for (var paramKey in combinedParams.keys) {
+      // if the param value is null -> nothing to add here
+      if (combinedParams[paramKey] == null) {
+        continue;
+      }
+
       // if the param key is defined within our url -> replace it there
       if (retUrl.contains(':$paramKey')) {
         retUrl = retUrl.replaceAll(':$paramKey', combinedParams[paramKey]!);

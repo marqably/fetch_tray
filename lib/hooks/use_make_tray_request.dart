@@ -30,8 +30,8 @@ class TrayRequestHookResponse<RequestType extends TrayRequest, ResultType> {
   final ResultType? data;
   final TrayRequestError? error;
   final RequestType request;
-  final Future<void> Function()? refetch;
-  final Future<void> Function()? fetchMore;
+  final Future<void> Function(Map<String, String?> overwriteParams) refetch;
+  final Future<void> Function() fetchMore;
 
   TrayRequestHookResponse({
     required this.refetch,
@@ -53,7 +53,7 @@ class TrayRequestHookResponse<RequestType extends TrayRequest, ResultType> {
     TrayRequestError? error,
     RequestType? request,
     UseMakeRequestFetchMethod<RequestType, ResultType>? fetch,
-    Future<void> Function()? refetch,
+    Future<void> Function(Map<String, String?> overwriteParams)? refetch,
     Future<void> Function()? fetchMore,
   }) {
     return TrayRequestHookResponse(
@@ -88,9 +88,9 @@ TrayRequestHookResponse<RequestType, ResultType>
         return null;
       },
       metadata: defaultTrayRequestMetadata,
-      refetch: null,
+      refetch: (overwriteParams) async {},
       request: request,
-      fetchMore: null,
+      fetchMore: () async {},
     ),
   );
 
@@ -153,14 +153,19 @@ TrayRequestHookResponse<RequestType, ResultType>
     }
 
     // define our refetch method
-    Future<TrayRequestHookResponse<RequestType, ResultType>> refetchMethod([
-      RequestType? newCustomRequest,
-    ]) {
+    Future<TrayRequestHookResponse<RequestType, ResultType>> refetchMethod(
+        Map<String, String?> overwriteParams) {
       fetchResult.value = fetchResult.value.copyWith(loading: true);
+
+      // overwrite the params
+      request.overwriteParams = {
+        ...request.overwriteParams,
+        ...overwriteParams,
+      };
 
       return fetchRequest(
         true,
-        newCustomRequest,
+        request,
         fetchParser,
       );
     }
@@ -239,7 +244,7 @@ TrayRequestHookResponse<RequestType, ResultType>
           statusCode: 500,
         ),
         metadata: defaultTrayRequestMetadata,
-        fetchMore: null,
+        fetchMore: () async {},
         // TODO: add test for refetching
         refetch: refetchMethod,
         // TODO: add test for lazy fetching
@@ -260,8 +265,8 @@ TrayRequestHookResponse<RequestType, ResultType>
           TrayRequestFetchParser<ResultType>? fetchParser,
         ]) =>
             fetchRequest(true, newCustomRequest, fetchParser),
-        refetch: null,
-        fetchMore: null,
+        refetch: (overwriteParams) async {},
+        fetchMore: () async {},
         metadata: defaultTrayRequestMetadata,
         request: request,
       );
