@@ -33,3 +33,7 @@
 ## 0.0.8
 
 * Added `fetchMore` method
+
+## 0.0.9
+
+* Improved `refetch` functionality
