@@ -30,7 +30,7 @@ class PagePaginationDriver<RequestType extends TrayRequest, ResultType>
 
     // get the next page
     final nextPage = int.parse(
-            currentParams?[paginationProperty()] ?? firstPage.toString()) +
+            currentParams[paginationProperty()] ?? firstPage.toString()) +
         1;
 
     request.overwriteParams = {
