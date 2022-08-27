@@ -463,6 +463,7 @@ We will review and merge PRs.
 
 ## TODO
 
+* [] change documentation to reflect custom metadata type changes
 * [] add tests for `refetching` and `fetchMore`
 * [] add docs for `lazyRun` parameter and post hooks
 * [] add docs POST (requestBody) behavior [example is currently in `tests/create_mock_user_request.dart`]
