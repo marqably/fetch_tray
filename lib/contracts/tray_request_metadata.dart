@@ -23,12 +23,15 @@ class TrayRequestMetadata {
   });
 }
 
-final defaultTrayRequestMetadata = TrayRequestMetadata(
-  currentPage: 0,
-  limit: 0,
-  totalPages: 0,
-  hasNextPage: false,
-  hasPreviousPage: false,
-  totalResults: 0,
-  extra: {},
-);
+// MetadataType
+//     defaultTrayRequestMetadata<MetadataType extends TrayRequestMetadata>() {
+//   return TrayRequestMetadata(
+//     currentPage: 0,
+//     limit: 0,
+//     totalPages: 0,
+//     hasNextPage: false,
+//     hasPreviousPage: false,
+//     totalResults: 0,
+//     extra: {},
+//   );
+// }

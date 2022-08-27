@@ -20,7 +20,8 @@ void main() {
       await tester.pumpWidget(HookBuilder(
         builder: (context) {
           element = context as HookElement;
-          final hookResult = useMakeTrayRequest<TrayRequest, MockUser>(
+          final hookResult =
+              useMakeTrayRequest<TrayRequest, MockUser, TrayRequestMetadata>(
             mockRequest,
             mock: TrayRequestMock('{"id": 1, "email": "test@example.com"}'),
           );
@@ -49,7 +50,8 @@ void main() {
     });
 
     testWidgets('loading state is set correctly', (tester) async {
-      late TrayRequestHookResponse<TrayRequest, MockUser> hookResult;
+      late TrayRequestHookResponse<TrayRequest, MockUser, TrayRequestMetadata>
+          hookResult;
       late HookElement element;
 
       // create a mock request
@@ -59,7 +61,8 @@ void main() {
       await tester.pumpWidget(HookBuilder(
         builder: (context) {
           element = context as HookElement;
-          hookResult = useMakeTrayRequest<TrayRequest, MockUser>(
+          hookResult =
+              useMakeTrayRequest<TrayRequest, MockUser, TrayRequestMetadata>(
             mockRequest,
             mock: TrayRequestMock('{"id": 1, "email": "test@example.com"}'),
           );
@@ -84,7 +87,8 @@ void main() {
     });
 
     testWidgets('failed responses are handled correctly', (tester) async {
-      late TrayRequestHookResponse<TrayRequest, MockUser> hookResult;
+      late TrayRequestHookResponse<TrayRequest, MockUser, TrayRequestMetadata>
+          hookResult;
 
       // create a mock request
       final mockRequest = FetchMockUserRequest();
@@ -92,7 +96,8 @@ void main() {
       // create example widget and use the hook
       await tester.pumpWidget(HookBuilder(
         builder: (context) {
-          hookResult = useMakeTrayRequest<TrayRequest, MockUser>(
+          hookResult =
+              useMakeTrayRequest<TrayRequest, MockUser, TrayRequestMetadata>(
             mockRequest,
             mock: TrayRequestMock(
               '{"message": "not allowed", "errors": ["no access to this resource"]}',

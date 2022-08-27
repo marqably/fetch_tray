@@ -10,7 +10,7 @@ import '../pagination_drivers/fetch_tray_pagination_driver.dart';
 class TrayRequest<T> {
   final String url;
   T? result;
-  final Map<String, String>? params;
+  final Map<String, String?>? params;
   final TrayRequestBody? body;
   final Map<String, String>? headers;
   final MakeRequestMethod method;
@@ -46,9 +46,14 @@ class TrayRequest<T> {
   Map<String, String> getParamsRaw(
       [Map<String, String?> customParams = const {}]) {
     final overwritingParams = {...(customParams), ...overwriteParams};
-    final returnParams = {
-      ...(params ?? {}),
-    };
+    final returnParams = <String, String>{};
+
+    // add all parameters, that are not null to the return params
+    params?.forEach((key, value) {
+      if (value != null) {
+        returnParams[key] = value;
+      }
+    });
 
     // now loop through params and overwrite or remove (if value is null) value
     for (final key in overwritingParams.keys) {
@@ -66,8 +71,8 @@ class TrayRequest<T> {
 
   /// a method that allows us to customize even complex params generations
   /// by default, we just return the params passed to the request here.
-  Map<String, String>? getParams(
-      [Map<String, String> requestParams = const {}]) {
+  Map<String, String> getParams(
+      [Map<String, String?> requestParams = const {}]) {
     return getParamsRaw(requestParams);
   }
 
@@ -158,20 +163,23 @@ class TrayRequest<T> {
   T mergePaginatedResults(T currentData, T newData) {
     // just return default data and throw warning
     log(
-      'Please implement the mergePaginatedResults method in your request, to combine paginated results correctly.',
+      // ignore: unnecessary_this
+      'Please implement the mergePaginatedResults method in your request ${this.toString()} $url, to combine paginated results correctly.',
       name: 'fetch_tray',
     );
     return [] as T;
   }
 
-  TrayRequestMetadata generateMetaData<RequestType extends TrayRequest>(
+  dynamic generateMetaData<RequestType extends TrayRequest,
+          MetadataType extends TrayRequestMetadata>(
       RequestType request, dynamic responseJson) {
     // just return default data and throw warning
     log(
-      'Please implement the mergePaginatedResults method in your request, to combine paginated results correctly.',
+      // ignore: unnecessary_this
+      'Please implement the generateMetaData method in your request ${this.toString()} $url, to provide metadata information.',
       name: 'fetch_tray',
     );
 
-    return defaultTrayRequestMetadata;
+    return null;
   }
 }

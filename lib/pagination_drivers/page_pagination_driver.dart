@@ -26,11 +26,11 @@ class PagePaginationDriver<RequestType extends TrayRequest, ResultType>
   @override
   RequestType fetchMoreRequest() {
     // get current params
-    final currentParmas = request.getParams();
+    final currentParams = request.getParams();
 
     // get the next page
     final nextPage = int.parse(
-            currentParmas?[paginationProperty()] ?? firstPage.toString()) +
+            currentParams?[paginationProperty()] ?? firstPage.toString()) +
         1;
 
     request.overwriteParams = {

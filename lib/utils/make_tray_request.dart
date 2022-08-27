@@ -285,6 +285,7 @@ void logRequest({
   final requestDetails = encoder.convert(
     {
       'requestUrl': request.url,
+      'method': request.method.toString(),
       'request': Uri.parse(request.getUrlWithParams()).toString(),
       'headers': request.getHeaders(),
       'body': request.getBody(),
