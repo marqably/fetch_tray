@@ -12,6 +12,13 @@ import 'package:mockito/mockito.dart';
 
 import './use_make_tray_request.mocks.dart';
 
+typedef FetchMoreMethodType<RequestType extends TrayRequest, ResultType,
+        MetadataType extends TrayRequestMetadata>
+    = Future<
+            TrayRequestHookResponse<RequestType, ResultType,
+                TrayRequestMetadata>?>
+        Function();
+
 typedef UseMakeRequestFetchMethod<RequestType extends TrayRequest, ResultType,
         MetadataType extends TrayRequestMetadata>
     = Future<
@@ -37,7 +44,8 @@ class TrayRequestHookResponse<RequestType extends TrayRequest, ResultType,
   final TrayRequestError? error;
   final RequestType request;
   final Future<void> Function(Map<String, String?> overwriteParams) refetch;
-  final Future<void> Function() fetchMore;
+  final FetchMoreMethodType<RequestType, ResultType, TrayRequestMetadata>
+      fetchMore;
 
   TrayRequestHookResponse({
     required this.refetch,
@@ -60,7 +68,7 @@ class TrayRequestHookResponse<RequestType extends TrayRequest, ResultType,
     RequestType? request,
     UseMakeRequestFetchMethod<RequestType, ResultType, MetadataType>? fetch,
     Future<void> Function(Map<String, String?> overwriteParams)? refetch,
-    Future<void> Function()? fetchMore,
+    FetchMoreMethodType<RequestType, ResultType, MetadataType>? fetchMore,
   }) {
     return TrayRequestHookResponse(
       refetch: refetch ?? this.refetch,
@@ -82,7 +90,7 @@ createHookResponse<RequestType extends TrayRequest, ResultType,
   required UseMakeRequestFetchMethod<RequestType, ResultType, MetadataType>
       fetch,
   required Future<void> Function(Map<String, String?> overwriteParams) refetch,
-  required Future<void> Function() fetchMore,
+  required FetchMoreMethodType<RequestType, ResultType, MetadataType> fetchMore,
   MetadataType? metadata,
   bool loading = true,
   bool fetchMoreLoading = false,
@@ -126,7 +134,9 @@ TrayRequestHookResponse<RequestType, ResultType, MetadataType>
       metadata: null, // defaultTrayRequestMetadata(),
       refetch: (overwriteParams) async {},
       request: request,
-      fetchMore: () async {},
+      fetchMore: () async {
+        return null;
+      },
     ),
   );
 
@@ -137,16 +147,22 @@ TrayRequestHookResponse<RequestType, ResultType, MetadataType>
   final methodCall = getEnvironmentMethod(mockClient, request.method);
 
   // mock request response
-  when(methodCall(
-    Uri.parse(request.getUrlWithParams()),
-    headers: request.getHeaders(),
-    body: request.getBody(),
-  )).thenAnswer(
-    (_) async => http.Response(
-      mock?.result ?? '',
-      mock?.statusCode ?? 200,
-    ),
-  );
+  Future<void> mockData() async {
+    final url = Uri.parse(await request.getUrlWithParams());
+    final headers = await request.getHeaders();
+    final body = await request.getBody();
+
+    when(methodCall(
+      url,
+      headers: headers,
+      body: body,
+    )).thenAnswer(
+      (_) async => http.Response(
+        mock?.result ?? '',
+        mock?.statusCode ?? 200,
+      ),
+    );
+  }
 
   // define the fetch request
   Future<TrayRequestHookResponse<RequestType, ResultType, TrayRequestMetadata>>
@@ -156,6 +172,10 @@ TrayRequestHookResponse<RequestType, ResultType, MetadataType>
     TrayRequestFetchParser<ResultType>? fetchParser,
     bool isFetchMore = false,
   ]) async {
+    // mock the request data if we are in mock mode
+    // if (mock != null) await mockData();
+    mockData();
+
     // make it possible to overwrite custom request (if needed - used for example for fetch for new pages)
     final theRequest = customRequest ?? request;
 
@@ -215,7 +235,7 @@ TrayRequestHookResponse<RequestType, ResultType, MetadataType>
       );
     }
 
-    return makeTrayRequestMethod.then((response) {
+    return makeTrayRequestMethod.then((response) async {
       // if we got a custom fetch parser -> pass old and new data and take the result
       final newDataDefined = (fetchParser != null)
           ? fetchParser(fetchResult.value.data, response.data)
@@ -230,8 +250,9 @@ TrayRequestHookResponse<RequestType, ResultType, MetadataType>
           : newDataDefined;
 
       // get the pagination metadata
-      final metadata = theRequest.generateMetaData<RequestType, MetadataType>(
-          request, response.dataRaw ?? {});
+      final metadata =
+          await theRequest.generateMetaData<RequestType, MetadataType>(
+              request, response.dataRaw ?? {});
 
       // set the new state
       final newResponse =
@@ -244,18 +265,20 @@ TrayRequestHookResponse<RequestType, ResultType, MetadataType>
         metadata: metadata,
         refetch: refetchMethod,
         // TODO: add test for fetchMore
-        fetchMore: () {
+        fetchMore: () async {
           // set the loading state
           fetchResult.value = fetchResult.value.copyWith(
             fetchMoreLoading: true,
           );
 
+          final fetchMoreRequest = await requestState.value
+              .pagination<RequestType>(requestState.value)
+              .fetchMoreRequest();
+
           // make the request
           return fetchRequest(
             true,
-            requestState.value
-                .pagination<RequestType>(requestState.value)
-                .fetchMoreRequest(),
+            fetchMoreRequest,
             fetchParser,
             true,
           );
@@ -273,10 +296,10 @@ TrayRequestHookResponse<RequestType, ResultType, MetadataType>
         // need to check for possible memory leaks though
         return newResponse;
       }
-    }).catchError((error, stacktrace) {
+    }).catchError((error, stacktrace) async {
       // log error
       log(
-        'An error happened with url: ${request.getUrlWithParams()}: $error',
+        'An error happened with url: ${await request.getUrlWithParams()}: $error',
         error: error,
         stackTrace: stacktrace,
       );
@@ -293,7 +316,9 @@ TrayRequestHookResponse<RequestType, ResultType, MetadataType>
           statusCode: 500,
         ),
         metadata: null, // defaultTrayRequestMetadata(),
-        fetchMore: () async {},
+        fetchMore: () async {
+          return null;
+        },
         // TODO: add test for refetching
         refetch: refetchMethod,
         // TODO: add test for lazy fetching
@@ -316,7 +341,9 @@ TrayRequestHookResponse<RequestType, ResultType, MetadataType>
         ]) =>
             fetchRequest(true, newCustomRequest, fetchParser),
         refetch: (overwriteParams) async {},
-        fetchMore: () async {},
+        fetchMore: () async {
+          return null;
+        },
         metadata: null, //defaultTrayRequestMetadata(),
         request: request,
       );

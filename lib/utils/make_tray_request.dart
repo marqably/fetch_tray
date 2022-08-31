@@ -128,11 +128,15 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
       response: response,
     );
 
+    final url = Uri.parse(await request.getUrlWithParams());
+    final headers = await request.getHeaders();
+    final body = await request.getBody();
+
     // make request
     response = await methodCaller(
-      Uri.parse(request.getUrlWithParams()),
-      headers: request.getHeaders(),
-      body: request.getBody(),
+      url,
+      headers: headers,
+      body: body,
     );
 
     // if in debug mode (at least FetchTrayDebugLevel.everything) -> log
@@ -268,7 +272,7 @@ void logRequest({
   FetchTrayDebugLevel? requestDebugLevel,
   String? message,
   StackTrace? stackTrace,
-}) {
+}) async {
   final shouldBeShown = (request
       .getEnvironment()
       .showDebugInfo(logType: logType, localDebugLevel: requestDebugLevel));
@@ -280,15 +284,20 @@ void logRequest({
 
   var logger = Logger();
 
+  // await values
+  final url = Uri.parse(await request.getUrlWithParams());
+  final headers = await request.getHeaders();
+  final body = await request.getBody();
+
   // define request details:
   var encoder = const JsonEncoder.withIndent("     ");
   final requestDetails = encoder.convert(
     {
       'requestUrl': request.url,
       'method': request.method.toString(),
-      'request': Uri.parse(request.getUrlWithParams()).toString(),
-      'headers': request.getHeaders(),
-      'body': request.getBody(),
+      'request': url.toString(),
+      'headers': headers,
+      'body': body,
       'resultBody': response.body,
     },
   );

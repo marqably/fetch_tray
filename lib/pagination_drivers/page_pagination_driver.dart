@@ -24,9 +24,9 @@ class PagePaginationDriver<RequestType extends TrayRequest, ResultType>
 
   /// This method defines the way we determine whether our current request has more data to fetch.
   @override
-  RequestType fetchMoreRequest() {
+  Future<RequestType> fetchMoreRequest() async {
     // get current params
-    final currentParams = request.getParams();
+    final currentParams = await request.getParams();
 
     // get the next page
     final nextPage = int.parse(

@@ -45,3 +45,7 @@
 ## 0.1.1
 
 * Fixed tests for metadata type functionality
+
+## 0.2.0
+
+* Made all `getParams`, `getUrl`, ... async

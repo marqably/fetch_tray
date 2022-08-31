@@ -1,6 +1,6 @@
 name: fetch_tray
 description: A set of flutter_hooks to make fetching and working with data from apis easier.
-version: 0.1.1
+version: 0.2.0
 homepage: https://github.com/marqably/fetch_tray
 repository: https://github.com/marqably/fetch_tray
 

@@ -21,11 +21,16 @@ Future<TrayRequestResponse<ModelType>> makeTrayTestingRequest<ModelType>(
   // get the correct request method
   final methodCall = getEnvironmentMethod(mockClient, request.method);
 
+  // await the values
+  final url = Uri.parse(await request.getUrlWithParams());
+  final headers = await request.getHeaders();
+  final body = await request.getBody();
+
   // mock request response
   when(methodCall(
-    Uri.parse(request.getUrlWithParams()),
-    headers: request.getHeaders(),
-    body: request.getBody(),
+    url,
+    headers: headers,
+    body: body,
   )).thenAnswer(
     (_) async => http.Response(
       mock.result,

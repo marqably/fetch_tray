@@ -9,7 +9,7 @@ class FetchTrayPaginationDriver<RequestType extends TrayRequest, ResultType> {
   final RequestType request;
 
   /// This method defines the way we determine whether our current request has more data to fetch.
-  RequestType fetchMoreRequest() {
+  Future<RequestType> fetchMoreRequest() async {
     log('Please implement the fetchMoreRequest method in $RequestType');
     return request;
   }

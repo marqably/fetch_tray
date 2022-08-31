@@ -37,7 +37,7 @@ class TrayRequest<T> {
 
   /// a method that allows us to customize even complex url generations
   /// by default, we just return the url passed to the request here.
-  String getUrl() {
+  Future<String> getUrl() async {
     return url;
   }
 
@@ -71,18 +71,18 @@ class TrayRequest<T> {
 
   /// a method that allows us to customize even complex params generations
   /// by default, we just return the params passed to the request here.
-  Map<String, String> getParams(
-      [Map<String, String?> requestParams = const {}]) {
+  Future<Map<String, String>> getParams(
+      [Map<String, String?> requestParams = const {}]) async {
     return getParamsRaw(requestParams);
   }
 
   /// parses the params and makes sure they are either inserted into the
   /// path (if used like `/user/:var1/:var2/`) or if not defined there, they will
   /// be added as query params
-  String getUrlWithParams() {
+  Future<String> getUrlWithParams() async {
     // get the combined params of client and request
     final clientAndRequestParams =
-        getEnvironment().getCombinedParams(getParams(params ?? {}));
+        getEnvironment().getCombinedParams(await getParams(params ?? {}));
 
     // make sure that our overwrite sticks (it is possible, that the `getParams` method was overwritten,
     // but we still want to have the overwrite at the very end, but also when somebody wants to
@@ -91,11 +91,11 @@ class TrayRequest<T> {
 
     // if no params given -> nothing to do
     if (combinedParams.isEmpty) {
-      return getEnvironment().baseUrl + getUrl();
+      return getEnvironment().baseUrl + await getUrl();
     }
 
     // otherwise loop through the combinedParams and try to replace or add the combinedParams
-    String retUrl = getEnvironment().baseUrl + getUrl();
+    String retUrl = getEnvironment().baseUrl + await getUrl();
     List<String> queryParams = [];
     for (var paramKey in combinedParams.keys) {
       // if the param value is null -> nothing to add here
@@ -123,7 +123,7 @@ class TrayRequest<T> {
   }
 
   /// returns the request body object
-  getBody() {
+  getBody() async {
     // if we got a map body
     if (body?.bodyType == TrayRequestBodyType.map) {
       return body?.getMap();
@@ -139,7 +139,7 @@ class TrayRequest<T> {
   }
 
   /// returns the combined headers from this request and client
-  getHeaders() {
+  Future<Map<String, String>> getHeaders() async {
     return getEnvironment().getCombinedHeaders(headers);
   }
 
