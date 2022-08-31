@@ -174,7 +174,7 @@ TrayRequestHookResponse<RequestType, ResultType, MetadataType>
   ]) async {
     // mock the request data if we are in mock mode
     // if (mock != null) await mockData();
-    mockData();
+    await mockData();
 
     // make it possible to overwrite custom request (if needed - used for example for fetch for new pages)
     final theRequest = customRequest ?? request;
