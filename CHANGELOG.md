@@ -49,3 +49,7 @@
 ## 0.2.0
 
 * Made all `getParams`, `getUrl`, ... async
+
+## 0.2.1
+
+* Fixed handling of empty response bodies

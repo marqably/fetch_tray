@@ -150,7 +150,8 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
 
     // if response successful -> parse it and return
     if (validStatuses.contains(response.statusCode)) {
-      final responseJson = jsonDecode(response.body);
+      final responseJson =
+          (response.body != '') ? jsonDecode(response.body) : response.body;
 
       return Future(() {
         final trayRequestResponse = TrayRequestResponse<ModelType>(
