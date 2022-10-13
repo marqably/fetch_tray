@@ -153,7 +153,7 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
       final responseJson =
           (response.body != '') ? jsonDecode(response.body) : response.body;
 
-      return Future(() {
+      try {
         final trayRequestResponse = TrayRequestResponse<ModelType>(
           data: request.getModelFromJson(
             responseJson,
@@ -165,8 +165,8 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
         request.afterSuccess(trayRequestResponse);
 
         // return it
-        return trayRequestResponse;
-      }).catchError((err) {
+        return Future.value(trayRequestResponse);
+      } catch (err) {
         // log error
         logRequest(
           message:
@@ -177,14 +177,15 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
           response: response,
         );
 
-        return TrayRequestResponse<ModelType>(
+        final trayRequestResponse = TrayRequestResponse<ModelType>(
           error: request.getEnvironment().parseErrorDetails(
             request,
             response,
             {'rawJson': response.body},
           ),
         );
-      });
+        return Future.value(trayRequestResponse);
+      }
     }
 
     // try to parse the json anyway, so we can get a good error message
