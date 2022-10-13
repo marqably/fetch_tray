@@ -56,4 +56,8 @@
 
 ## 0.2.2
 
+* Small bugfixes
+
+## 0.2.3
+
 * Fixed tests after async change of `getParams`, `getUrl`, ... (thanks to [@lukasbachlechner] (<https://www.github.com/lukasbachlechner)> for that)
