@@ -108,6 +108,10 @@ void main() {
       // make sure the response has to time to be injected
       await tester.pump(const Duration());
 
+      Future(
+        () {},
+      );
+
       // make sure the data and loading states are disabled
       expect(hookResult.loading, false);
       expect(hookResult.data, null);
