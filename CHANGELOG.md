@@ -53,3 +53,7 @@
 ## 0.2.1
 
 * Fixed handling of empty response bodies
+
+## 0.2.2
+
+* Fixed tests after async change of `getParams`, `getUrl`, ... (thanks to [@lukasbachlechner] (<https://www.github.com/lukasbachlechner)> for that)
