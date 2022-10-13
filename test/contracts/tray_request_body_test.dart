@@ -12,7 +12,7 @@ void main() {
         email: 'test@example.com',
       );
 
-      expect(requestBody.getMap(), {
+      expect(await requestBody.getMap(), {
         'id': '3',
         'email': 'test@example.com',
       });

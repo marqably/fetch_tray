@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -19,15 +21,23 @@ Future<TrayRequestResponse<ModelType>> makeTrayTestingRequest<ModelType>(
   // get the correct request method
   final methodCall = getEnvironmentMethod(mockClient, request.method);
 
+  // await the values
+  final url = Uri.parse(await request.getUrlWithParams());
+  final headers = await request.getHeaders();
+  final body = await request.getBody();
+
   // mock request response
   when(methodCall(
-    Uri.parse(request.getUrlWithParams()),
-    headers: request.getHeaders(),
-    body: request.getBody(),
+    url,
+    headers: headers,
+    body: body,
   )).thenAnswer(
     (_) async => http.Response(
       mock.result,
       mock.statusCode,
+      headers: {
+        HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+      },
     ),
   );
 

@@ -1,20 +1,21 @@
 {
     "cSpell.words": [
-        "classname",
-        "customheader",
-        "customparam",
-        "eveything",
-        "exampleheader",
-        "Fetchmore",
-        "fetchtray",
-        "inlcude",
-        "mockdata",
-        "NONJSONRESULT",
-        "riverpod",
-        "signup",
-        "supersecrettoken",
-        "testheader",
-        "TODOS",
-        "userid"
+      "classname",
+      "customheader",
+      "customparam",
+      "eveything",
+      "exampleheader",
+      "Fetchmore",
+      "fetchtray",
+      "inlcude",
+      "mockdata",
+      "NONJSONRESULT",
+      "paginatable",
+      "riverpod",
+      "signup",
+      "supersecrettoken",
+      "testheader",
+      "TODOS",
+      "userid"
     ]
 }

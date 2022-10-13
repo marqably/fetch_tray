@@ -44,11 +44,16 @@ LazyTrayRequestHookResponse useMakeLazyTrayRequest({
     // get the correct request method
     final methodCall = getEnvironmentMethod(mockClient, request.method);
 
+    // await values
+    final url = Uri.parse(await request.getUrlWithParams());
+    final headers = await request.getHeaders();
+    final body = await request.getBody();
+
     // mock request response
     when(methodCall(
-      Uri.parse(request.getUrlWithParams()),
-      headers: request.getHeaders(),
-      body: request.getBody(),
+      url,
+      headers: headers,
+      body: body,
     )).thenAnswer(
       (_) async => http.Response(
         mock?.result ?? '',
@@ -64,10 +69,10 @@ LazyTrayRequestHookResponse useMakeLazyTrayRequest({
 
     try {
       final response =
-          await makeTrayRequestMethod.catchError((error, stacktrace) {
+          await makeTrayRequestMethod.catchError((error, stacktrace) async {
         // log error
         log(
-          'SHOULD NOT SHOW: An error happened with url: ${request.getUrlWithParams()}: $error',
+          'SHOULD NOT SHOW: An error happened with url: ${await request.getUrlWithParams()}: $error',
           error: error,
           stackTrace: stacktrace,
         );

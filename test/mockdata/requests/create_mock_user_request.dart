@@ -12,7 +12,7 @@ class CreateMockUserRequestBody extends TrayRequestBody {
   });
 
   @override
-  Map<String, String> getMap() {
+  Future<Map<String, String>> getMap() async {
     return {
       'email': email.toString(),
     };

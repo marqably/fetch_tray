@@ -13,7 +13,8 @@ void main() {
         params: {'id': '1'},
       );
 
-      expect(request.getUrlWithParams(), 'https://www.example.com/users/1');
+      expect(
+          await request.getUrlWithParams(), 'https://www.example.com/users/1');
     });
 
     /// it should be possible to send params, that are not in the url path
@@ -26,7 +27,7 @@ void main() {
         params: {'orderBy': 'name'},
       );
 
-      expect(request.getUrlWithParams(),
+      expect(await request.getUrlWithParams(),
           'https://www.example.com/users/?orderBy=name');
     });
 
@@ -45,7 +46,7 @@ void main() {
       );
 
       expect(
-        request.getUrlWithParams(),
+        await request.getUrlWithParams(),
         'https://www.example.com/users/1?orderBy=name',
       );
     });

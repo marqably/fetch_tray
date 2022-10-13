@@ -80,10 +80,12 @@ class TrayRequestError {
 /// the response class of a tray request, containing either the data or an error object
 class TrayRequestResponse<ResultType> {
   final ResultType? data;
+  final dynamic dataRaw;
   final TrayRequestError? error;
 
   TrayRequestResponse({
     this.error,
+    this.dataRaw,
     this.data,
   });
 }
@@ -126,11 +128,15 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
       response: response,
     );
 
+    final url = Uri.parse(await request.getUrlWithParams());
+    final headers = await request.getHeaders();
+    final body = await request.getBody();
+
     // make request
     response = await methodCaller(
-      Uri.parse(request.getUrlWithParams()),
-      headers: request.getHeaders(),
-      body: request.getBody(),
+      url,
+      headers: headers,
+      body: body,
     );
 
     // if in debug mode (at least FetchTrayDebugLevel.everything) -> log
@@ -144,11 +150,15 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
 
     // if response successful -> parse it and return
     if (validStatuses.contains(response.statusCode)) {
+      final responseJson =
+          (response.body != '') ? jsonDecode(response.body) : response.body;
+
       return Future(() {
         final trayRequestResponse = TrayRequestResponse<ModelType>(
           data: request.getModelFromJson(
-            jsonDecode(response.body),
+            responseJson,
           ),
+          dataRaw: responseJson,
         );
 
         // call after success hook
@@ -156,6 +166,24 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
 
         // return it
         return trayRequestResponse;
+      }).catchError((err) {
+        // log error
+        logRequest(
+          message:
+              'FETCH TRAY EXCEPTION: Could not convert the code to json! ${err.toString()}',
+          logType: FetchTrayLogLevel.error,
+          requestDebugLevel: requestDebugLevel,
+          request: request,
+          response: response,
+        );
+
+        return TrayRequestResponse<ModelType>(
+          error: request.getEnvironment().parseErrorDetails(
+            request,
+            response,
+            {'rawJson': response.body},
+          ),
+        );
       });
     }
 
@@ -245,7 +273,7 @@ void logRequest({
   FetchTrayDebugLevel? requestDebugLevel,
   String? message,
   StackTrace? stackTrace,
-}) {
+}) async {
   final shouldBeShown = (request
       .getEnvironment()
       .showDebugInfo(logType: logType, localDebugLevel: requestDebugLevel));
@@ -257,14 +285,20 @@ void logRequest({
 
   var logger = Logger();
 
+  // await values
+  final url = Uri.parse(await request.getUrlWithParams());
+  final headers = await request.getHeaders();
+  final body = await request.getBody();
+
   // define request details:
   var encoder = const JsonEncoder.withIndent("     ");
   final requestDetails = encoder.convert(
     {
       'requestUrl': request.url,
-      'request': Uri.parse(request.getUrlWithParams()).toString(),
-      'headers': request.getHeaders(),
-      'body': request.getBody(),
+      'method': request.method.toString(),
+      'request': url.toString(),
+      'headers': headers,
+      'body': body,
       'resultBody': response.body,
     },
   );
