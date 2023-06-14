@@ -1,11 +1,8 @@
 import 'dart:developer';
 
-import 'package:fetch_tray/contracts/tray_environment.dart';
-import 'package:fetch_tray/contracts/tray_request_body.dart';
-import 'package:fetch_tray/contracts/tray_request_metadata.dart';
-import 'package:fetch_tray/utils/make_tray_request.dart';
-
-import '../pagination_drivers/fetch_tray_pagination_driver.dart';
+import '../pagination_drivers/pagination_drivers.dart';
+import '../utils/utils.dart';
+import 'contracts.dart';
 
 class TrayRequest<T> {
   final String url;

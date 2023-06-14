@@ -1,6 +1,7 @@
 import 'package:http/http.dart';
 
-import '../fetch_tray.dart';
+import '../utils/utils.dart';
+import 'contracts.dart';
 
 enum FetchTrayDebugLevel {
   none,
