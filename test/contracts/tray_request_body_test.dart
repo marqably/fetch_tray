@@ -1,4 +1,4 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 import '../mockdata/requests/update_mock_user_request.dart';
 
