@@ -1,9 +1,8 @@
 import 'dart:convert';
-import 'package:fetch_tray/contracts/tray_request.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
-import '../contracts/tray_environment.dart';
+import '../contracts/contracts.dart';
 
 const validStatuses = [200, 201];
 

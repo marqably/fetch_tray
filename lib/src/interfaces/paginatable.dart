@@ -1,5 +1,4 @@
-import '../contracts/tray_request_metadata.dart';
-import '../contracts/tray_request.dart';
+import '../contracts/contracts.dart';
 
 mixin Paginatable<ResultType> {
   /// Defines the way paginated results should be combined

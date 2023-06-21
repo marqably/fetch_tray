@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import '../contracts/tray_request.dart';
+import '../contracts/contracts.dart';
 
 class FetchTrayPaginationDriver<RequestType extends TrayRequest, ResultType> {
   FetchTrayPaginationDriver(this.request);

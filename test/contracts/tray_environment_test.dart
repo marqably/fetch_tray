@@ -1,5 +1,5 @@
-import 'package:fetch_tray/contracts/tray_environment.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:fetch_tray/fetch_tray.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('tray_environment getCombinedHeaders', () {

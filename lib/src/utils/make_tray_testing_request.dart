@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import '../fetch_tray.dart';
+import '../../fetch_tray.dart';
 import 'make_tray_testing_request.mocks.dart';
 
 /// provides a mocked version of the makeTrayRequest method
