@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
@@ -113,16 +112,14 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
   final client = FetchTray.instance.dio;
 
   try {
-    CacheOptions cacheOptions = FetchTray.instance.cacheOptions;
-
-    if (request.cacheOptions != null) {
-      cacheOptions = request.cacheOptions!;
-    }
+    final mergedRequestExtra = FetchTray.instance.plugins
+        .map((plugin) => plugin.getRequestExtra(request))
+        .reduce((value, element) => value..addAll(element));
 
     final options = Options(
       method: request.method.toString().split('.').last,
       headers: await request.getHeaders(),
-      extra: cacheOptions.toExtra(),
+      extra: mergedRequestExtra,
     );
 
     final response = await client.request(

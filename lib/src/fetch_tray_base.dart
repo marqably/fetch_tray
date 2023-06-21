@@ -1,39 +1,23 @@
 import 'package:dio/dio.dart';
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+import 'package:fetch_tray/fetch_tray.dart';
 
 class FetchTray {
   FetchTray._({
-    CacheOptions? cacheOptions,
+    this.plugins = const [],
   }) {
-    final store = MemCacheStore();
-    this.cacheOptions = cacheOptions ??
-        CacheOptions(
-          policy: CachePolicy.request,
-          store: store,
-        );
-
     dio = Dio()
       ..interceptors.addAll([
-        InterceptorsWrapper(
-          onRequest: (options, handler) async {
-            final key = this.cacheOptions.keyBuilder(options);
-            final cache = await store.get(key);
-
-            print(cache);
-          },
-          onResponse: (e, handler) {
-            handler.next(e);
-          },
-        ),
-        DioCacheInterceptor(options: this.cacheOptions),
+        ...plugins.map((plugin) => plugin.interceptors).expand(
+              (plugin) => plugin,
+            ),
       ]);
   }
 
   factory FetchTray.init({
-    CacheOptions? cacheOptions,
+    List<TrayPlugin> plugins = const [],
   }) {
     _instance = FetchTray._(
-      cacheOptions: cacheOptions,
+      plugins: plugins,
     );
 
     return _instance!;
@@ -49,7 +33,7 @@ class FetchTray {
   }
 
   late final Dio dio;
-  late final CacheOptions cacheOptions;
+  late final List<TrayPlugin> plugins;
 
   static FetchTray? _instance;
 }

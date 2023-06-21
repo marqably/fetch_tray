@@ -1,7 +1,5 @@
 import 'dart:developer';
 
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
-
 import '../pagination_drivers/pagination_drivers.dart';
 import '../utils/utils.dart';
 import 'contracts.dart';
@@ -14,7 +12,6 @@ class TrayRequest<T> {
   final Map<String, String>? headers;
   final MakeRequestMethod method;
   Map<String, String?> overwriteParams = {};
-  final CacheOptions? cacheOptions;
 
   TrayRequest({
     this.url = '/',
@@ -22,7 +19,6 @@ class TrayRequest<T> {
     this.body,
     this.method = MakeRequestMethod.get,
     this.headers,
-    this.cacheOptions,
   });
 
   /// returns the fetch hook client used for this request
