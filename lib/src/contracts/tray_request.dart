@@ -32,6 +32,16 @@ class TrayRequest<T> {
     return;
   }
 
+  Uri get uri {
+    Uri parsedUri = Uri.parse(url);
+
+    if (!parsedUri.host.isNotEmpty) {
+      parsedUri = Uri.parse(getEnvironment().baseUrl + url);
+    }
+
+    return parsedUri;
+  }
+
   /// a method that allows us to customize even complex url generations
   /// by default, we just return the url passed to the request here.
   Future<String> getUrl() async {

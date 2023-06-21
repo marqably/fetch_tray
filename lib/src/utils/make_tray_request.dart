@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
 import '../contracts/contracts.dart';
+import '../fetch_tray_base.dart';
 
 const validStatuses = [200, 201];
 
@@ -107,16 +109,77 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
   http.Client? client,
   FetchTrayDebugLevel? requestDebugLevel,
 }) async {
-  // define the client
-  final theClient = client ?? http.Client();
-
-  // get the correct caller method
-  final methodCaller = getEnvironmentMethod(theClient, request.method);
-
-  // the response
-  var response = http.Response('', 200);
+  final client = FetchTray.instance.dio;
 
   try {
+    final mergedRequestExtra = FetchTray.instance.plugins
+        .map((plugin) => plugin.getRequestExtra(request))
+        .reduce((value, element) => value..addAll(element));
+
+    final options = Options(
+      method: request.method.toString().split('.').last,
+      headers: await request.getHeaders(),
+      extra: mergedRequestExtra,
+    );
+
+    final response = await client.request(
+      request.uri.toString(),
+      data: await request.getBody(),
+      options: options,
+    );
+
+    try {
+      return TrayRequestResponse<ModelType>(
+        data: request.getModelFromJson(
+          response.data,
+        ),
+        dataRaw: response.data,
+      );
+    } catch (e) {
+      throw const FormatException();
+    }
+  } on DioException catch (e) {
+    if (e.response != null) {
+      /* print(e.response!.data);
+      print(e.response!.headers);
+      print(e.response!.requestOptions); */
+
+      return TrayRequestResponse<ModelType>(
+        error: TrayRequestError(
+          message: e.message ?? 'Unexpected error',
+          errors: e.response?.data,
+          statusCode: e.response!.statusCode!,
+        ),
+      );
+    } else {
+      // Something happened in setting up or sending the request that triggered an Error
+      return TrayRequestResponse<ModelType>(
+        error: TrayRequestError(
+          message: e.message ?? 'Unexpected error',
+          errors: null,
+          statusCode: 500,
+        ),
+      );
+    }
+  } on FormatException {
+    return TrayRequestResponse<ModelType>(
+      error: TrayRequestError(
+        message: 'Error parsing JSON.',
+        errors: null,
+        statusCode: 500,
+      ),
+    );
+  } catch (e) {
+    return TrayRequestResponse<ModelType>(
+      error: TrayRequestError(
+        message: 'Unexpected error.',
+        errors: null,
+        statusCode: 500,
+      ),
+    );
+  }
+
+  /* try {
     // if in debug mode (at least FetchTrayDebugLevel.everything) -> log
     logRequest(
       message:
@@ -124,19 +187,19 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
       logType: FetchTrayLogLevel.info,
       requestDebugLevel: requestDebugLevel,
       request: request,
-      response: response,
     );
-
-    final url = Uri.parse(await request.getUrlWithParams());
-    final headers = await request.getHeaders();
-    final body = await request.getBody();
 
     // make request
-    response = await methodCaller(
-      url,
-      headers: headers,
-      body: body,
-    );
+   
+
+    if(validStatuses.contains(response.statusCode)) {
+      return TrayRequestResponse<ModelType>(
+        data: request.getModelFromJson(
+          response.data,
+        ),
+        dataRaw: response.data,
+      );
+    }
 
     // if in debug mode (at least FetchTrayDebugLevel.everything) -> log
     logRequest(
@@ -150,7 +213,7 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
     // if response successful -> parse it and return
     if (validStatuses.contains(response.statusCode)) {
       final responseJson =
-          (response.body != '') ? jsonDecode(response.body) : response.body;
+          (response.data != '') ? jsonDecode(response.data) : response.data;
 
       try {
         final trayRequestResponse = TrayRequestResponse<ModelType>(
@@ -262,14 +325,15 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
         },
       ),
     );
-  }
+  } */
 }
 
 /// provides a shortcut to logging out requests
 void logRequest({
   required TrayRequest request,
   required FetchTrayLogLevel logType,
-  required http.Response response,
+  // http.Response? response,
+  Response? response,
   FetchTrayDebugLevel? requestDebugLevel,
   String? message,
   StackTrace? stackTrace,
@@ -299,7 +363,7 @@ void logRequest({
       'request': url.toString(),
       'headers': headers,
       'body': body,
-      'resultBody': response.body,
+      'resultBody': response?.data,
     },
   );
 
