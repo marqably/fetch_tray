@@ -42,6 +42,16 @@ class TrayRequest<T> {
     return parsedUri;
   }
 
+  String safeUrl(String url) {
+    Uri parsedUri = Uri.parse(url);
+
+    if (!parsedUri.host.isNotEmpty) {
+      parsedUri = Uri.parse(getEnvironment().baseUrl + url);
+    }
+
+    return parsedUri.toString();
+  }
+
   /// a method that allows us to customize even complex url generations
   /// by default, we just return the url passed to the request here.
   Future<String> getUrl() async {
@@ -126,7 +136,7 @@ class TrayRequest<T> {
     }
 
     // return it
-    return retUrl;
+    return safeUrl(retUrl);
   }
 
   /// returns the request body object

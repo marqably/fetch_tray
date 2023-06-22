@@ -95,7 +95,7 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
     );
 
     response = await clientToUse.request(
-      request.uri.toString(),
+      await request.getUrlWithParams(),
       data: await request.getBody(),
       options: options,
     );
