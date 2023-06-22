@@ -109,20 +109,11 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
       response: response,
     );
 
-    if (!validStatuses.contains(response.statusCode)) {
-      throw DioError(
-        requestOptions: RequestOptions(
-          path: request.url,
-        ),
-        response: response,
-        error: 'Invalid status code',
-      );
-    }
-
     try {
+      print('ft: ${response.data}');
       final trayRequestResponse = TrayRequestResponse<ModelType>(
         data: request.getModelFromJson(
-          jsonDecode(response.data),
+          response.data,
         ),
         dataRaw: response.data,
       );
