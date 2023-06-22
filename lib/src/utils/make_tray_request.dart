@@ -69,9 +69,15 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
   );
 
   try {
-    final mergedRequestExtra = FetchTray.instance.plugins
-        .map((plugin) => plugin.getRequestExtra(request))
-        .reduce((value, element) => value..addAll(element));
+    final pluginRequestExtra = FetchTray.instance.plugins.map(
+      (plugin) => plugin.getRequestExtra(request),
+    );
+    Map<String, dynamic> mergedRequestExtra = {};
+
+    if (pluginRequestExtra.isNotEmpty) {
+      mergedRequestExtra =
+          pluginRequestExtra.reduce((value, element) => value..addAll(element));
+    }
 
     final options = Options(
       method: request.method.toString().split('.').last,
@@ -103,10 +109,20 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
       response: response,
     );
 
+    if (!validStatuses.contains(response.statusCode)) {
+      throw DioError(
+        requestOptions: RequestOptions(
+          path: request.url,
+        ),
+        response: response,
+        error: 'Invalid status code',
+      );
+    }
+
     try {
       final trayRequestResponse = TrayRequestResponse<ModelType>(
         data: request.getModelFromJson(
-          response.data,
+          jsonDecode(response.data),
         ),
         dataRaw: response.data,
       );
@@ -116,7 +132,9 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
 
       // return it
       return Future.value(trayRequestResponse);
-    } catch (e) {
+    } catch (e, st) {
+      print(e);
+      print(st);
       throw const FormatException();
     }
   } on DioException catch (e) {
@@ -180,6 +198,8 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
       ),
     );
   } catch (err, stackTrace) {
+    print(err);
+    print(stackTrace);
     logRequest(
       message: 'FETCH TRAY EXCEPTION: ${err.toString()}',
       logType: FetchTrayLogLevel.error,

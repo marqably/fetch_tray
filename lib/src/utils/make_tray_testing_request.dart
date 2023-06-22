@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:fetch_tray/src/utils/make_tray_testing_request.mocks.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../fetch_tray.dart';
 
@@ -14,21 +16,8 @@ Future<TrayRequestResponse<ModelType>> makeTrayTestingRequest<ModelType>(
   TrayRequestMock mock, {
   FetchTrayDebugLevel? requestDebugLevel = FetchTrayDebugLevel.none,
 }) async {
-  return TrayRequestResponse<ModelType>(
-    data: null,
-    dataRaw: null,
-    error: TrayRequestError(
-      message: 'This method is currently not implemented!',
-      errors: [],
-      statusCode: 500,
-      debugInfo: {},
-    ),
-  );
-  /* // create the mock client
-  final mockClient = MockClient();
-
-  // get the correct request method
-  final methodCall = getEnvironmentMethod(mockClient, request.method);
+  // create the mock client
+  final mockClient = MockDio();
 
   // await the values
   final url = Uri.parse(await request.getUrlWithParams());
@@ -36,18 +25,23 @@ Future<TrayRequestResponse<ModelType>> makeTrayTestingRequest<ModelType>(
   final body = await request.getBody();
 
   // mock request response
-  when(methodCall(
-    url,
-    headers: headers,
-    body: body,
+  when(mockClient.request(
+    url.toString(),
+    data: body,
+    options: anyNamed('options'),
   )).thenAnswer(
-    (_) async => http.Response(
-      mock.result,
-      mock.statusCode,
-      headers: {
+    (_) async {
+      return Response(
+        requestOptions: RequestOptions(
+          path: request.url,
+        ),
+        data: mock.result,
+        statusCode: mock.statusCode,
+        /*  headers: {
         HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
-      },
-    ),
+      }, */
+      );
+    },
   );
 
   // make request
@@ -55,5 +49,5 @@ Future<TrayRequestResponse<ModelType>> makeTrayTestingRequest<ModelType>(
     request,
     client: mockClient,
     requestDebugLevel: requestDebugLevel,
-  ); */
+  );
 }
