@@ -110,7 +110,6 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
     );
 
     try {
-      print('ft: ${response.data}');
       final trayRequestResponse = TrayRequestResponse<ModelType>(
         data: request.getModelFromJson(
           response.data,
@@ -123,9 +122,7 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
 
       // return it
       return Future.value(trayRequestResponse);
-    } catch (e, st) {
-      print(e);
-      print(st);
+    } catch (e) {
       throw const FormatException();
     }
   } on DioException catch (e) {
@@ -189,8 +186,6 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
       ),
     );
   } catch (err, stackTrace) {
-    print(err);
-    print(stackTrace);
     logRequest(
       message: 'FETCH TRAY EXCEPTION: ${err.toString()}',
       logType: FetchTrayLogLevel.error,
