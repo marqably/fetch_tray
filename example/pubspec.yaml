@@ -10,9 +10,11 @@ environment:
 # Add regular dependencies here.
 dependencies:
   fetch_tray:
-    path: ../
-  fetch_tray_cache:
-    path: ../../fetch_tray_cache
+    git:
+      url: https://github.com/marqably/fetch_tray
+      ref: next
+  fetch_tray_cache_plugin:
+    git: https://github.com/marqably/fetch_tray_cache_plugin.git
   # path: ^1.8.0
 
 dev_dependencies:

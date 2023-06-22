@@ -1,7 +1,7 @@
 /* import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart'; */
 import 'package:fetch_tray/fetch_tray.dart';
-import 'package:fetch_tray_cache/fetch_tray_cache.dart';
+import 'package:fetch_tray_cache_plugin/fetch_tray_cache.dart';
 
 class MyRequest<T> extends TrayRequest<T> {
   MyRequest({

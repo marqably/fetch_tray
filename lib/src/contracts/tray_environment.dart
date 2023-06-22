@@ -1,4 +1,4 @@
-import 'package:http/http.dart';
+import 'package:dio/dio.dart';
 
 import '../utils/utils.dart';
 import 'contracts.dart';
@@ -86,7 +86,7 @@ class TrayEnvironment {
       message:
           errorBodyJson['message'] ?? 'Failed to load request ${request.url}!',
       errors: errorBodyJson['errors'] ?? [],
-      statusCode: response.statusCode,
+      statusCode: response.statusCode ?? 500,
       debugInfo: debugInfo,
     );
   }

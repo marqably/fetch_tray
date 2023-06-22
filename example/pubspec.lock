@@ -140,17 +140,21 @@ packages:
   fetch_tray:
     dependency: "direct main"
     description:
-      path: ".."
-      relative: true
-    source: path
+      path: "."
+      ref: next
+      resolved-ref: "132b412fcea240baa2f4b4ec328b59a7285c5638"
+      url: "https://github.com/marqably/fetch_tray"
+    source: git
     version: "0.2.3"
-  fetch_tray_cache:
+  fetch_tray_cache_plugin:
     dependency: "direct main"
     description:
-      path: "../../fetch_tray_cache"
-      relative: true
-    source: path
-    version: "1.0.0"
+      path: "."
+      ref: HEAD
+      resolved-ref: a74845111ecebdd0630bb5071bc7500dcfc2119d
+      url: "https://github.com/marqably/fetch_tray_cache_plugin.git"
+    source: git
+    version: "0.0.1"
   file:
     dependency: transitive
     description:
