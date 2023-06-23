@@ -141,7 +141,7 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
         error: request.getEnvironment().parseErrorDetails(
               request,
               e.response!,
-              jsonDecode(e.response!.data),
+              e.response!.data,
             ),
       );
     } else {
