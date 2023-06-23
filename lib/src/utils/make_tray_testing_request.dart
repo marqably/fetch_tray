@@ -21,7 +21,7 @@ Future<TrayRequestResponse<ModelType>> makeTrayTestingRequest<ModelType>(
 
   // await the values
   final url = Uri.parse(await request.getUrlWithParams());
-  final headers = await request.getHeaders();
+  // final headers = await request.getHeaders();
   final body = await request.getBody();
 
   // mock request response
