@@ -1,6 +1,6 @@
 name: fetch_tray
 description: An opinionated, easy to use, and flexible HTTP client for Dart, which can be used with hooks.
-version: 0.3.0-rc.1
+version: 0.3.0-rc.2
 homepage: https://github.com/marqably/fetch_tray
 repository: https://github.com/marqably/fetch_tray
 
