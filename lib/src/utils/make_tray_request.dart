@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 
 import '../contracts/contracts.dart';
+import '../exceptions/exceptions.dart';
 import '../fetch_tray_base.dart';
 
 const validStatuses = [200, 201];
@@ -122,8 +123,8 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
 
       // return it
       return Future.value(trayRequestResponse);
-    } catch (e) {
-      throw const FormatException();
+    } catch (e, st) {
+      throw JsonConversionException(e.toString(), st);
     }
   } on DioException catch (e) {
     // log error
@@ -162,7 +163,7 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
         ),
       );
     }
-  } on FormatException catch (err) {
+  } on JsonConversionException catch (err) {
     logRequest(
       message:
           'FETCH TRAY EXCEPTION: Could not convert the code to json! ${err.toString()}',
@@ -176,9 +177,10 @@ Future<TrayRequestResponse<ModelType>> makeTrayRequest<ModelType>(
         request,
         response,
         {
-          'message': 'Unexpected server response!',
+          'message': err.message,
         },
         debugInfo: {
+          'stackTrace': err.stackTrace,
           'debugHint':
               'FetchTray result could not be converted! Please check whether the result was really a json entity representing the model. (${err.toString()})',
           'resultBody': response.data,
