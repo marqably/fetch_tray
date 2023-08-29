@@ -4,8 +4,10 @@ import 'package:fetch_tray/fetch_tray.dart';
 class FetchTray {
   FetchTray._({
     this.plugins = const [],
+    Dio? dio,
   }) {
-    dio = Dio()
+    final dioClient = dio ?? Dio();
+    this.dio = dioClient
       ..interceptors.addAll([
         ...plugins.map((plugin) => plugin.interceptors).expand(
               (plugin) => plugin,
@@ -15,9 +17,11 @@ class FetchTray {
 
   factory FetchTray.init({
     List<TrayPlugin> plugins = const [],
+    Dio? dio,
   }) {
     _instance = FetchTray._(
       plugins: plugins,
+      dio: dio,
     );
 
     return _instance!;
