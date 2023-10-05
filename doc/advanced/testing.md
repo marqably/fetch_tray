@@ -108,7 +108,7 @@ void main() {
         builder: (context) {
           response = useFetchUserRequest(
             4,
-            mock: TrayRequestMock(userMockdata),
+            mock: TrayRequestMock(json.decode(userMockdata)),
           );
 
           return Container();
@@ -140,7 +140,7 @@ void main() {
           hookResult = useFetchUserRequest<User>(
             4,
             mock: TrayRequestMock(
-              '{"message": "not allowed"}',
+              json.decode('{"message": "not allowed"}'),
               statusCode: 410,
             ),
           );
