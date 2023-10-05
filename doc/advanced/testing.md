@@ -140,7 +140,7 @@ void main() {
           hookResult = useFetchUserRequest<User>(
             4,
             mock: TrayRequestMock(
-              '{"message": "not allowed"}',
+              json.decode('{"message": "not allowed"}'),
               statusCode: 410,
             ),
           );
