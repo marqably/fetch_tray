@@ -46,7 +46,7 @@ class TrayRequestResponse<ResultType> {
 
 /// an object containing mock details
 class TrayRequestMock {
-  final String result;
+  final dynamic result;
   final int statusCode;
 
   TrayRequestMock(
