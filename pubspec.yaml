@@ -13,17 +13,17 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  flutter_hooks: ^0.18.5  
-  http: ^0.13.4
+  flutter_hooks: ^0.20.4  
+  http: ^1.2.0
   mockito: ^5.2.0
   build_runner: ^2.1.11
-  logger: ^1.1.0
+  logger: ^2.0.2+1
 
 dev_dependencies:
   test:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.1
-  hooks_riverpod: ^1.0.4
+  flutter_lints: ^3.0.1
+  hooks_riverpod: ^2.4.9
 
 flutter:

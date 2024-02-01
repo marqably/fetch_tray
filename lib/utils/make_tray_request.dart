@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:fetch_tray/contracts/tray_request.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
@@ -310,10 +311,12 @@ void logRequest({
       logger.i('${message ?? 'FetchTray Info'}\n\n$requestDetails');
       break;
     case FetchTrayLogLevel.warning:
-      logger.w(requestDetails, message ?? 'FetchTray Warning', stackTrace);
+      logger.w(message ?? 'FetchTray Warning',
+          time: DateTime.now(), stackTrace: stackTrace, error: requestDetails);
       break;
     case FetchTrayLogLevel.error:
-      logger.e(requestDetails, message ?? 'FetchTray Error', stackTrace);
+      logger.w(message ?? 'FetchTray Error',
+          time: DateTime.now(), stackTrace: stackTrace, error: requestDetails);
       break;
   }
 }
