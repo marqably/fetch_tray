@@ -4,10 +4,10 @@ import 'fetch_tray_pagination_driver.dart';
 class PagePaginationDriver<RequestType extends TrayRequest, ResultType>
     extends FetchTrayPaginationDriver<RequestType, ResultType> {
   PagePaginationDriver(
-    RequestType request, {
+    super.request, {
     this.firstPage = 1,
     this.pageProperty = 'page',
-  }) : super(request);
+  });
 
   /// Defines whether the first page starts with 0 or 1 (depending on the api, this can differ)
   final int firstPage;

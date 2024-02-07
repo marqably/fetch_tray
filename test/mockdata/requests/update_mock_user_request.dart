@@ -22,11 +22,9 @@ class UpdateMockUserRequestBody extends TrayRequestBody {
 
 class UpdateMockUserRequest extends TrayRequest<MockUser> {
   UpdateMockUserRequest({
-    String url = 'https://api.example.com/user',
-    required UpdateMockUserRequestBody body,
+    super.url = 'https://api.example.com/user',
+    required UpdateMockUserRequestBody super.body,
   }) : super(
-          url: url,
-          body: body,
           method: MakeRequestMethod.put,
         );
 
