@@ -1,11 +1,8 @@
 import 'dart:developer';
 
-import 'package:fetch_tray/contracts/tray_environment.dart';
-import 'package:fetch_tray/contracts/tray_request_body.dart';
-import 'package:fetch_tray/contracts/tray_request_metadata.dart';
-import 'package:fetch_tray/utils/make_tray_request.dart';
-
-import '../pagination_drivers/fetch_tray_pagination_driver.dart';
+import '../pagination_drivers/pagination_drivers.dart';
+import '../utils/utils.dart';
+import 'contracts.dart';
 
 class TrayRequest<T> {
   final String url;
@@ -33,6 +30,26 @@ class TrayRequest<T> {
   /// for a single entry
   dynamic getModelFromJson(/* Map<String, dynamic> */ dynamic json) {
     return;
+  }
+
+  Uri get uri {
+    Uri parsedUri = Uri.parse(url);
+
+    if (!parsedUri.host.isNotEmpty) {
+      parsedUri = Uri.parse(getEnvironment().baseUrl + url);
+    }
+
+    return parsedUri;
+  }
+
+  String safeUrl(String url) {
+    Uri parsedUri = Uri.parse(url);
+
+    if (!parsedUri.host.isNotEmpty) {
+      parsedUri = Uri.parse(getEnvironment().baseUrl + url);
+    }
+
+    return parsedUri.toString();
   }
 
   /// a method that allows us to customize even complex url generations
@@ -119,7 +136,7 @@ class TrayRequest<T> {
     }
 
     // return it
-    return retUrl;
+    return safeUrl(retUrl);
   }
 
   /// returns the request body object

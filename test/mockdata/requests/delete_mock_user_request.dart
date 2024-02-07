@@ -1,5 +1,4 @@
-import 'package:fetch_tray/contracts/tray_request.dart';
-import 'package:fetch_tray/utils/make_tray_request.dart';
+import 'package:fetch_tray/fetch_tray.dart';
 
 import '../models/mock_user.dart';
 

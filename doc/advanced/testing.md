@@ -20,7 +20,7 @@ Here is an example model test:
 
 ```dart
 import 'package:my_package/data/models/my_model.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('my_model model test', () {
@@ -52,7 +52,7 @@ You can just pass this object to the `makeTrayRequest` method using the `mock` p
 import 'package:my_package/data/models/user.dart';
 import 'package:my_package/data/requests/fetch_user_request.dart';
 import 'package:fetch_tray/fetch_tray.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('fetch_user_request', () {
@@ -92,7 +92,7 @@ import 'package:fetch_tray/hooks/use_make_tray_request.dart';
 import 'package:fetch_tray/utils/make_tray_request.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:my_package/data/hooks/use_fetch_user_request.dart';
 import 'package:my_package/data/models/user.dart';
 
@@ -108,7 +108,7 @@ void main() {
         builder: (context) {
           response = useFetchUserRequest(
             4,
-            mock: TrayRequestMock(userMockdata),
+            mock: TrayRequestMock(json.decode(userMockdata)),
           );
 
           return Container();
@@ -127,7 +127,7 @@ void main() {
       // check for correctly set properties
       expect(response.data?.id, 4);
       expect(response.data?.name, 'Test user');
-      
+
       await tester.pump(const Duration());
     });
 
@@ -140,7 +140,7 @@ void main() {
           hookResult = useFetchUserRequest<User>(
             4,
             mock: TrayRequestMock(
-              '{"message": "not allowed"}',
+              json.decode('{"message": "not allowed"}'),
               statusCode: 410,
             ),
           );

@@ -1,6 +1,8 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:fetch_tray/fetch_tray.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart' as http;
+import 'package:test/test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
@@ -14,27 +16,45 @@ import '../mockdata/requests/fetch_mock_user_request.dart';
 import '../mockdata/requests/update_mock_user_request.dart';
 import 'make_tray_request_test.mocks.dart';
 
-@GenerateMocks([http.Client])
+@GenerateMocks([Dio])
 void main() {
+  FetchTray.init();
+
+  Options? optionsWithMethod(String method) {
+    return argThat(
+      isA<Options>().having(
+        (options) => options.method,
+        'Method',
+        equals(method),
+      ),
+      named: 'options',
+    );
+  }
+
   group('makeTrayRequest basics', () {
     /// it should be possible to make a request with a single entry as a result
     /// (think a request returning a single blog post)
     test('request with single model result returns model', () async {
       // create the mock client
-      final mockClient = MockClient();
+      final mockClient = MockDio();
 
       // create a mock request
       final mockRequest = FetchMockUserRequest();
 
       // Use Mockito to return a successful response when it calls the
-      // provided http.Client.
-      when(mockClient.get(
-        Uri.parse(mockRequest.url),
-        headers: {},
+      // provided  Dio client.
+      when(mockClient.request(
+        mockRequest.url,
+        options: anyNamed(
+          'options',
+        ),
       )).thenAnswer(
-        (_) async => http.Response(
-          '{"id": 1, "email": "test@example.com"}',
-          200,
+        (_) async => Response(
+          data: jsonDecode('{"id": 1, "email": "test@example.com"}'),
+          statusCode: 200,
+          requestOptions: RequestOptions(
+            path: mockRequest.url,
+          ),
         ),
       );
 
@@ -61,17 +81,22 @@ void main() {
       const exampleUrl = 'https://www.example.com/adifferenturl';
 
       // create the mock client
-      final mockClient = MockClient();
+      final mockClient = MockDio();
 
       // Use Mockito to return a successful response when it calls the
       // provided http.Client.
-      when(mockClient.get(
-        Uri.parse(exampleUrl),
-        headers: {},
+      when(mockClient.request(
+        exampleUrl,
+        options: anyNamed(
+          'options',
+        ),
       )).thenAnswer(
-        (_) async => http.Response(
-          '{"id": 1, "email": "test@example.com"}',
-          200,
+        (_) async => Response(
+          data: jsonDecode('{"id": 1, "email": "test@example.com"}'),
+          statusCode: 200,
+          requestOptions: RequestOptions(
+            path: exampleUrl,
+          ),
         ),
       );
 
@@ -95,16 +120,21 @@ void main() {
       const exampleUrl = 'https://www.example.com/listofmodels';
 
       // create the mock client
-      final mockClient = MockClient();
+      final mockClient = MockDio();
 
       // return a list of items
-      when(mockClient.get(
-        Uri.parse(exampleUrl),
-        headers: {},
+      when(mockClient.request(
+        exampleUrl,
+        options: anyNamed(
+          'options',
+        ),
       )).thenAnswer(
-        (_) async => http.Response(
-          '[{"id": 1, "email": "test1@example.com"}, {"id": 2, "email": "test2@example.com"}]',
-          200,
+        (_) async => Response(
+          data: jsonDecode(
+              '[{"id": 1, "email": "test1@example.com"}, {"id": 2, "email": "test2@example.com"}]'),
+          requestOptions: RequestOptions(
+            path: exampleUrl,
+          ),
         ),
       );
 
@@ -130,7 +160,7 @@ void main() {
     /// It should be possible to make post requests with a body
     test('make post request', () async {
       // create the mock client
-      final mockClient = MockClient();
+      final mockClient = MockDio();
 
       // create a mock request body
       final mockRequestBody = CreateMockUserRequestBody(
@@ -142,15 +172,18 @@ void main() {
         body: mockRequestBody,
       );
 
-      // mock request response
-      when(mockClient.post(
-        Uri.parse(mockRequest.url),
-        body: argThat(contains('test3@example.com'), named: 'body'),
-        headers: {},
-      )).thenAnswer(
-        (_) async => http.Response(
-          '{"id": 3, "email": "test3@example.com"}',
-          200,
+      when(
+        mockClient.request(
+          mockRequest.url,
+          data: anyNamed('data'),
+          options: optionsWithMethod('post'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: jsonDecode('{"id": 3, "email": "test3@example.com"}'),
+          requestOptions: RequestOptions(
+            path: mockRequest.url,
+          ),
         ),
       );
 
@@ -171,7 +204,7 @@ void main() {
     /// It should be possible to make put requests with a body
     test('make put request', () async {
       // create the mock client
-      final mockClient = MockClient();
+      final mockClient = MockDio();
 
       // create a mock request body
       final mockRequestBody = UpdateMockUserRequestBody(
@@ -185,15 +218,17 @@ void main() {
       );
 
       // mock request response
-      when(mockClient.put(
-        Uri.parse(mockRequest.url),
+      when(mockClient.request(
+        mockRequest.url,
         // body: {'id': '4', 'email': 'test4@example.com'},
-        body: argThat(contains('test4@example.com'), named: 'body'),
-        headers: {},
+        data: anyNamed('data'),
+        options: optionsWithMethod('put'),
       )).thenAnswer(
-        (_) async => http.Response(
-          '{"id": 4, "email": "test4@example.com"}',
-          200,
+        (_) async => Response(
+          data: jsonDecode('{"id": 4, "email": "test4@example.com"}'),
+          requestOptions: RequestOptions(
+            path: mockRequest.url,
+          ),
         ),
       );
 
@@ -214,7 +249,7 @@ void main() {
     /// It should be possible to make post requests with a body
     test('make delete request', () async {
       // create the mock client
-      final mockClient = MockClient();
+      final mockClient = MockDio();
 
       // create a mock request
       final mockRequest = DeleteMockUserRequest(
@@ -222,14 +257,16 @@ void main() {
       );
 
       // mock request response
-      when(mockClient.delete(
-        Uri.parse('https://api.example.com/user/5'),
-        body: anyNamed('body'),
-        headers: {},
+      when(mockClient.request(
+        'https://api.example.com/user/5',
+        data: anyNamed('data'),
+        options: optionsWithMethod('delete'),
       )).thenAnswer(
-        (_) async => http.Response(
-          '{"id": 5, "email": "test5@example.com"}',
-          200,
+        (_) async => Response(
+          data: jsonDecode('{"id": 5, "email": "test5@example.com"}'),
+          requestOptions: RequestOptions(
+            path: mockRequest.url,
+          ),
         ),
       );
 
@@ -253,7 +290,7 @@ void main() {
     /// Headers should be used correctly
     test('make post request', () async {
       // create the mock client
-      final mockClient = MockClient();
+      final mockClient = MockDio();
 
       // create a mock request
       final mockRequest = FetchMockUserCustomClientRequest(
@@ -266,7 +303,7 @@ void main() {
       );
 
       // mock request response
-      when(mockClient.get(
+      when(mockClient.request(
         Uri.parse(
           // baseUrl
           // ignore: prefer_adjacent_string_concatenation, prefer_interpolation_to_compose_strings
@@ -277,17 +314,14 @@ void main() {
               '?param1=param1_value' +
               // custom params
               '&customparam1=customparam1_value',
-        ),
-        headers: {
-          'exampleheader1': 'exampleheader1_value',
-          'exampleheader2': 'exampleheader2_value',
-          'exampleheader3': 'exampleheader3_value',
-          'customheader1': 'customheader1_value',
-        },
+        ).toString(),
+        options: anyNamed('options'),
       )).thenAnswer(
-        (_) async => http.Response(
-          '{"id": 3, "email": "test3@example.com"}',
-          200,
+        (_) async => Response(
+          data: jsonDecode('{"id": 3, "email": "test3@example.com"}'),
+          requestOptions: RequestOptions(
+            path: mockRequest.url,
+          ),
         ),
       );
 
@@ -311,27 +345,22 @@ void main() {
     /// Headers should be used correctly
     test('handles request exceptions with non json result', () async {
       // create the mock client
-      final mockClient = MockClient();
+      final mockClient = MockDio();
 
       // create a mock request
       final mockRequest = FetchMockUserCustomClientRequest();
 
       // mock request response
-      when(mockClient.get(
-        Uri.parse(
-          // baseUrl
-          // ignore: prefer_adjacent_string_concatenation
-          'https://api.customclient.com/test?param1=param1_value',
-        ),
-        headers: {
-          'exampleheader1': 'exampleheader1_value',
-          'exampleheader2': 'exampleheader2_value',
-          'exampleheader3': 'exampleheader3_value',
-        },
-      )).thenAnswer(
-        (_) async => http.Response(
-          'NONJSONRESULT',
-          500,
+      when(mockClient.request(
+              'https://api.customclient.com/test?param1=param1_value',
+              options: optionsWithMethod('get')))
+          .thenAnswer(
+        (_) async => Response(
+          data: 'NONJSONRESULT',
+          statusCode: 500,
+          requestOptions: RequestOptions(
+            path: mockRequest.url,
+          ),
         ),
       );
 

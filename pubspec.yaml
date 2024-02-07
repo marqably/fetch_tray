@@ -1,29 +1,18 @@
 name: fetch_tray
-description: A set of flutter_hooks to make fetching and working with data from apis easier.
-version: 0.2.4
+description: An opinionated, easy to use, and flexible HTTP client for Dart, which can be used with hooks.
+version: 0.3.3
 homepage: https://github.com/marqably/fetch_tray
 repository: https://github.com/marqably/fetch_tray
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=1.17.0"
+  sdk: ">=2.17.0 <4.0.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
-  flutter_localizations:
-    sdk: flutter
-  flutter_hooks: ^0.20.4  
-  http: ^1.2.0
   mockito: ^5.2.0
-  build_runner: ^2.1.11
-  logger: ^2.0.2+1
+  logger: ^1.1.0
+  dio: ^5.2.1+1
 
 dev_dependencies:
   test:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^3.0.1
-  hooks_riverpod: ^2.4.9
-
-flutter:
+  build_runner: ^2.1.11
+  flutter_lints: ^2.0.1
