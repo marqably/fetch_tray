@@ -1,7 +1,7 @@
 /* import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart'; */
 import 'package:fetch_tray/fetch_tray.dart';
-import 'package:fetch_tray_cache_plugin/fetch_tray_cache.dart';
+// import 'package:fetch_tray_cache_plugin/fetch_tray_cache.dart';
 
 class MyRequest<T> extends TrayRequest<T> {
   MyRequest({
@@ -29,7 +29,7 @@ class MyRequest<T> extends TrayRequest<T> {
   }
 }
 
-class TestCachedRequest extends MyRequest<String> implements CachedTrayRequest {
+class TestCachedRequest extends MyRequest<String> {
   TestCachedRequest()
       : super(
           url: 'https://hub.dummyapis.com/delay?seconds=1',
@@ -39,16 +39,9 @@ class TestCachedRequest extends MyRequest<String> implements CachedTrayRequest {
   getModelFromJson(json) {
     return json;
   }
-
-  @override
-  Duration get cacheDuration => Duration(seconds: 5);
-
-  @override
-  bool get useCache => true;
 }
 
-class TestLongCachedRequest extends MyRequest<String>
-    implements CachedTrayRequest {
+class TestLongCachedRequest extends MyRequest<String> {
   TestLongCachedRequest()
       : super(
           url: 'https://hub.dummyapis.com/delay?seconds=1',
@@ -58,12 +51,6 @@ class TestLongCachedRequest extends MyRequest<String>
   getModelFromJson(json) {
     return json;
   }
-
-  @override
-  Duration get cacheDuration => Duration(days: 100);
-
-  @override
-  bool get useCache => true;
 }
 
 /* Future<void> sequentialRequests(bool cache) async {
@@ -87,11 +74,7 @@ class TestLongCachedRequest extends MyRequest<String>
 
 void main() async {
   FetchTray.init(
-    plugins: [
-      TrayCachePlugin(
-        cacheStoreType: TrayCacheStoreType.memory,
-      ),
-    ],
+    plugins: [],
   );
 
   final normalCachedRequest = TestCachedRequest();
