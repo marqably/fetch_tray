@@ -19,14 +19,10 @@ class FetchMockUserCustomClientRequest extends TrayRequest<MockUser> {
   }
 
   FetchMockUserCustomClientRequest({
-    String url = '/test',
-    Map<String, String>? params,
-    Map<String, String>? headers,
-  }) : super(
-          url: url,
-          params: params,
-          headers: headers,
-        );
+    super.url = '/test',
+    Map<String, String>? super.params,
+    super.headers,
+  });
 
   @override
   MockUser getModelFromJson(dynamic json) {

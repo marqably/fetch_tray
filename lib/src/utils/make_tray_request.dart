@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 
@@ -257,10 +258,18 @@ void logRequest({
       logger.i('${message ?? 'FetchTray Info'}\n\n$requestDetails');
       break;
     case FetchTrayLogLevel.warning:
-      logger.w(requestDetails, message ?? 'FetchTray Warning', stackTrace);
+      logger.w(
+        message ?? 'FetchTray Warning',
+        error: requestDetails,
+        stackTrace: stackTrace,
+      );
       break;
     case FetchTrayLogLevel.error:
-      logger.e(requestDetails, message ?? 'FetchTray Error', stackTrace);
+      logger.e(
+        message ?? 'FetchTray Error',
+        error: requestDetails,
+        stackTrace: stackTrace,
+      );
       break;
   }
 }

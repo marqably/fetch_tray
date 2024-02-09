@@ -19,11 +19,9 @@ class CreateMockUserRequestBody extends TrayRequestBody {
 
 class CreateMockUserRequest extends TrayRequest<MockUser> {
   CreateMockUserRequest({
-    String url = 'https://api.example.com/user',
-    required CreateMockUserRequestBody body,
+    super.url = 'https://api.example.com/user',
+    required CreateMockUserRequestBody super.body,
   }) : super(
-          url: url,
-          body: body,
           method: MakeRequestMethod.post,
         );
 

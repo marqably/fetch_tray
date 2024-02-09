@@ -3,12 +3,9 @@ import '../models/mock_user.dart';
 
 class FetchMockUserRequest extends TrayRequest<MockUser> {
   FetchMockUserRequest({
-    String url = 'https://www.example.com/test',
-    Map<String, String>? params,
-  }) : super(
-          url: url,
-          params: params,
-        );
+    super.url = 'https://www.example.com/test',
+    Map<String, String>? super.params,
+  });
 
   @override
   MockUser getModelFromJson(dynamic json) {
